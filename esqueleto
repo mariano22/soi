@@ -6,25 +6,40 @@ ordenTipo( o : Orden) : OrdenName
 cliente( o : Orden ) : ClientId
 OrdenName == lsd, del, cre, opr, opw, wrt, rea, clo, bye
 
-OrdenWorkerName == wdel
+OrdenWorkerName == wDel, wOpr, wWrite, wRead, wOpW, wOpR, wSay, wOpnSucc
 crearOWdel( n : String, id : IdGlobal) : OrdenWorker
 crearOWOpr( n : String, id : IdGlobal) : OrdenWorker
+crearOWOpw( n : String, id : IdGlobal) : OrdenWorker
+crearW( file:String , cadena:String , id: IdGlobal) :OrdenWorker
+crearR( file:String , id: IdGlobal, sz : Int) : OrdenWorker
+crearClo( file:String , id: IdGlobal) : OrdenWorker
+crearSay( m : mensaje , id: ClientId) : OrdenWorker
+crearOpenSucc( idg : IdGlobal ) : OrdenWorker
 
 makeIdGlobal( w : WorkerId, c : ClientId) : GlobalId
 
 mensajeOk() : MensajeACliente
 mensajeErr() : MensajeACliente
-addArg( c : MensajeACliente, l : String ) : MensajeACliente
+addArg( c : Mensaje, l : String ) : Mensaje
 
-archivoNoExiste() : MensajeACliente { return mensajeErr("fileNotExist"); }
+archivoNoExiste() : Mensaje { return mensajeErr("fileNotExist"); }
+identidicadorNoExiste():Mensaje { return mensajeErr("idfNotExist"); }
+archivoOcupado():Mensaje { return mensajeErr("fileInUse"); }
 
-ResponderCliente( c : ClientId, m : MensajeACliente )
+ResponderCliente( c : ClientId, m : Mensaje )
 EnviarAWorker( c : WorkerId, m : OrdenWorker )
+ResponderWorker(idg : IDGlobal, m : Mensaje )
 
 archivosActuales() : [ String ]
 getOwner( s: String ) = noowner | WorkerId
+getFile( fd: FileId ) = noFile | String
 
 PonerEnColaCreate (name : String, idc : IdCliente )
+OpenWrite(name : String,idg : IdGlobal) abre el archivo para idg y conserva el identificador de archivos del fs
+fileHandle(name : String) : HandleFile devuelve el handle del archivo del fs
+Write(h : HandleFile, txt:String) me escribe el texto en el archivo manejado
+
+myFiles (file: String) = s : NoFile | Unused | Reading | Writing
 
 ACTUAR
 ======
@@ -56,8 +71,69 @@ actuarOpW(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
             W       -> Orden = crearOpW( name, makeIdGlobal( myId() , cliente(o) )
-                       EnviarAWorker( W, orden)
-			
+                       EnviarAWorker( W, orden)		
 }
 
+ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+actuarWrt(o : Orden, fd : FileId, txt : String) {
+        case getFile(fd)
+             noFile -> ResponderCliente(cliente(o), identidicadorNoExiste() )
+             file   -> case getOwner(file)
+                            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
+                            W       -> Orden = crearW( file, txt, makeIdGlobal( myId() , cliente(o) )
+                                       EnviarAWorker( W, orden)		
+}
+
+ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+actuarRead(o : Orden, fd : FileId, sz : Int) {
+        case getFile(fd)
+             noFile -> ResponderCliente(cliente(o), identidicadorNoExiste() )
+             file   -> case getOwner(file)
+                            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
+                            W       -> Orden = crearR( file, makeIdGlobal( myId() , cliente(o), sz )
+                                       EnviarAWorker( W, orden)		
+}
+
+ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+actuarClo(o : Orden, fd : FileId) {
+        case getFile(fd)
+             noFile -> ResponderCliente(cliente(o), identidicadorNoExiste() )
+             file   -> case getOwner(file)
+                            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
+                            W       -> Orden = crearClo( file, makeIdGlobal( myId() , cliente(o) )
+                                       EnviarAWorker( W, orden)		
+}
+
+actuarwDel(o : Orden,name : String, idg : IdGlobal){
+        case myFiles(name)
+             NoFile -> ResponderWorker(idg, archivoNoExiste() )
+             Unused -> PonerEnColaDelete (name,idg)
+             _      -> ResponderWorker(idg, archivoOcupado() )
+
+}
+
+ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+actuarwOpr(o : Orden, name : String, idg : IdGlobal){
+        case myFiles(name)
+             NoFile  -> ResponderWorker(idg, archivoNoExiste() )
+             Writing -> ResponderWorker(idg, archivoOcupado() )
+             _       -> OpenWrite(name,idg)
+                        Orden = crearOpenSucc( idg )
+                        EnviarAWorker( WId(idg) , Orden )		
+}
+ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+actuarwWrite(o : Orden, name : String, cadena : String, idg : IdGlobal){
+        case fileHandle(name,idg)
+             NoFile  -> ResponderWorker(idg, archivoNoExiste() )
+             Handle  -> Write(Handle,cadena)
+}
+actuarwRead(){
+
+}
+actuarwOpW(){
+
+}
+actuarwOpR(){
+
+}
 
