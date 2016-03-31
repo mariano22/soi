@@ -1,0 +1,53 @@
+Lista de funciones:
+==================
+
+myId() : WorkerId
+ordenTipo( o : Orden) : OrdenName
+cliente( o : Orden ) : ClientId
+OrdenName == lsd, del, cre, opr, opw, wrt, rea, clo, bye
+
+OrdenWorkerName == wdel
+crearOWdel( n : String, id : IdGlobal) : OrdenWorker
+
+makeIdGlobal( w : WorkerId, c : ClientId) : GlobalId
+
+mensajeOk() : MensajeACliente
+mensajeErr() : MensajeACliente
+addArg( c : MensajeACliente, l : String ) : MensajeACliente
+
+archivoNoExiste() : MensajeACliente { return mensajeErr("fileNotExist"); }
+
+ResponderCliente( c : ClientId, m : MensajeACliente )
+EnviarAWorker( c : WorkerId, m : OrdenWorker )
+
+archivosActuales() : [ String ]
+getOwner( s: String ) = noowner | WorkerId
+
+PonerEnColaCreate (name : String, idc : IdCliente )
+
+ACTUAR
+======
+
+actuarLsd(o : Orden) {
+            mensaje = fold (l->addArg(c,l)) mensajeOk() archivosActuales()
+            ResponderCliente( cliente(o), mensaje)
+}
+actuarDel(o : Orden, name : String) {
+        case getOwner(name) 
+            noowner -> ResponderCliente(cliente(o), mensajeErr())
+            W -> orden = crearOWdel( name, makeIdGlobal( myId() , cliente(o) ) )
+                 EnviarAWorker( W, orden)
+}
+actuarCre(o : Orden, name : String) {
+        case getOwner(name)            
+            noowner -> PonerEnColaCreate (name,cliente (o))
+            W -> ResponderCliente(cliente(o), archivoNoExiste() ))
+}
+
+actuarOpr(o : Orden, name : String) {
+        case getOwner(name)            
+            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
+            W -> 
+}
+
+
