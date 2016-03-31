@@ -50,4 +50,9 @@ actuarOpr(o : Orden, name : String) {
             W -> 
 }
 
+actuarOpw(o : Orden, name : String) {
+        case getOwner(name)            
+            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
+            W -> dfin
+}
 
