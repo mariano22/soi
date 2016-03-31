@@ -56,9 +56,12 @@ nueva funcion() {
     qweqwe
 }
 
-actuarOpw(o : Orden, name : String) {
+actuarOpW(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-            W -> dfin
+            W       -> Orden = crearOpW( name, makeIdGlobal( myId() , cliente(o) )
+                       EnviarAWorker( W, orden)
+			
 }
+
 
