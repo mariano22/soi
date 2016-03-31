@@ -47,7 +47,13 @@ actuarCre(o : Orden, name : String) {
 actuarOpr(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-            W -> 
+            W -> Hago como si la termino()
+}
+
+nueva funcion() {
+    aca habria codigo util
+    asdasd
+    qweqwe
 }
 
 
