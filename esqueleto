@@ -8,6 +8,7 @@ OrdenName == lsd, del, cre, opr, opw, wrt, rea, clo, bye
 
 OrdenWorkerName == wdel
 crearOWdel( n : String, id : IdGlobal) : OrdenWorker
+crearOWOpr( n : String, id : IdGlobal) : OrdenWorker
 
 makeIdGlobal( w : WorkerId, c : ClientId) : GlobalId
 
@@ -47,13 +48,8 @@ actuarCre(o : Orden, name : String) {
 actuarOpr(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-            W -> Hago como si la termino()
-}
-
-nueva funcion() {
-    aca habria codigo util
-    asdasd
-    qweqwe
+            W -> crearOWOpr(name, makeIdGlobal( myId() , cliente(o) ) )
+                 EnviarAWorker( W, orden )
 }
 
 actuarOpw(o : Orden, name : String) {
