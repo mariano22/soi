@@ -1,0 +1,62 @@
+% Esta es una guia de como implementar modulos:
+% Primero veamos como funciona el register:
+% Es una manera de registrar pid de procesos de modo que ahora un atomo es un sinonimo de un pid (buscar en internet)
+% Observar que la tabla de procesos registrados (que se puede ver con registered()) es global a todos los procesos, algo que es muy importante, osea si registramos algo con f1 o f2 ambos deberia aparecer cuando hagamos registered
+
+timer() -> receive
+            {hola} -> io:format("hola!~n");
+            _ -> io:format(":S~n")
+           end,
+           timer().
+
+
+f1(X) -> P=spawn(mar,timer,[]), register(X,P).
+f2(X) -> spawn(mar,f1,[X]).
+
+% Ahora supongamos que queremos programar un modulo que provea los siguientes servicios de una tabla:
+
+% Delete(tabla,key) : tabla (borra un elemento en la tabla)
+% Search(tabla,key) : not | value (busca un elemento en la tabla)
+% Add(tabla,key,value) : tabla (inserta un elemento en la tabla)
+% CreateT() : tabla (crea una tabla vacia)
+
+% Este modulo puede estar implementado como una lista, (que tabla sea una lista de pares), lo importante es que desde afuera siempre accedemos usando las funciones esas.
+% Ahora supongamos que estamos en el contexto de nuestro sistema de archivos y queremos dar un seguimiento a los archivos que nosotros poseemos, de los cuales guardamos siempre su estado:
+% myFiles( name : String) : NoFile | Unused | Reading | Writing (obtiene el estado de un archivo)
+% newFile( name : String) (registra un nuevo archivo, inicialmente como Unused)
+% openW( name : String) (cambia estado de name a Writing)
+% openR( name : String) (cambia estado de name a Reading)
+% delFile( name : String) (cambia estado de name a Reading)
+
+% En un lenguaje que tuviera variables globales, creariamos una tabla global TablaMyFiles:
+TablaGlobal = CreateT()
+
+myFiles(name) -> Search(TablaGlobal,name)
+newFile( name : String) -> TablaGlobal = Add(TablaGlobal,name,Unused)
+
+% Ahora, en erlang no hay variables globales :( asi que no podemos hacer asi...
+% Como hacemos? con register podemos tener un proceso global que responda manejando la tabla...
+
+% este va a ser la funcion que corra en nuestro proceso:
+myfilesloop(T) ->
+        receive
+            {P,myFiles,name} -> P ! Search(T,name), 
+                                myfilesloop(T);
+            {P,newFile,name} -> Tp=Add(T,name,Unused),
+                                P ! ok, 
+                                myfilesloop(Tp);
+            ...
+        end.
+            
+% Esta es la funcion que es analoga a la declaracion de la variable global:
+SetUpMyFiles() -> register(myfilestable,spawn(?MODULE,myfilesloop,[CreateT()]))
+
+% Estas funciones son la de la interfaz deseada, que hacen uso de la variable global que en este caso es nuestro proceso:
+myFiles(name) -> myfilestable ! {self(), myFiles, name},
+                 receive X -> X end.
+newFile(name) -> myfilestable ! {self(), newFile, name},
+                 receive ok -> ok end.
+
+
+
+
