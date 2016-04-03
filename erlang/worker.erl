@@ -140,13 +140,14 @@ proc (workerOpenRead, Task)->
     Name = task:fileName(Task),
     IdG  = task:idGlobal(Task),
     case localfiles:workerOpenRead(Name) of
-         NoFile -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
-         _      -> Gfd = task:fdGlobal(Task),
-                   C   = globalIdToClient(IdG),
-                   W   = globalIdToWorker(IdG),
-                   openerfiles:registerOpen(Gfd, C)
-                   Orden = task:crear_workerOpenSucc(Gfd, C),
-                   comunic:enviarWorker(W,Orden)
+         NoFile  -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
+         Writing -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado());
+         _       -> Gfd = task:fdGlobal(Task),
+                    C   = globalIdToClient(IdG),
+                    W   = globalIdToWorker(IdG),
+                    openerfiles:registerOpen(Gfd, C)
+                    Orden = task:crear_workerOpenSucc(Gfd, C),
+                    comunic:enviarWorker(W,Orden)
 
 
 
