@@ -1,6 +1,6 @@
 -module(ids).
 -compile(export_all).
 
-makeIdGlobal(Worker, Client) -> Client*Worker.%TODO
-
-myId()->1.%TODO
+makeIdGlobal(Worker, Client) -> error("makeIdGlobal").%TODO
+myId()->error("myId").%TODO
+globalFdToWorker(_)->error("globalFdToWorker").

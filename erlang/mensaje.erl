@@ -6,5 +6,10 @@ mErr() -> ["ERROR"].
 addArg(C,L) -> lists:append(L,[C]).
 say(M) -> lists:concat(M).
 
-archivoNoExiste() -> addArgc("notExist",mErr()).
+archivoNoExiste()    -> addArg("notExist",mErr()).
+archivoOcupado()     -> addArg("Ocuppied",mErr()).
+archivoYaExistente() -> addArg("Exist",mErr()).
 
+
+archivoBorrado()     -> addArg("Deleted",mOk()).
+archivoCreado()      -> addArg("Create",mOk()).
