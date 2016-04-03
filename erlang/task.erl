@@ -3,22 +3,19 @@
 
 
 % Tasks
-% userTasks [userTask, clientid, ...]
-% workerTasks [workerTask, ...]
+% Los modelamos como { TypeTask, [{campo,contenido}] }
 
-fileName(_)->error("fileName").
-idGlobal(_)->error("idGLobal").
-nameGlobal(_)->error("nameGlobal").
+fileName({_, L}) -> element(2,lists:keyfind(fileName,1,L)).
+idGlobal({_, L}) -> element(2,lists:keyfind(idGlobal,1,L)).
+fdGlobal({_, L}) -> element(2,lists:keyfind(fdGlobal,1,L)).
+cliente({_, L}) -> element(2,lists:keyfind(cliente,1,L)).
 
-cliente( [userTask | [C|_] ] ) -> C;
-cliente( _ ) -> error("acceso a cliente a algo inadecuado~n").
+crear_workerDelete(Name, Idg)-> { workerDelete, [{fileName,Name},{idGlobal,Idg}]
 
-crear_workerDelete(Name, Idg)->error("crear worker Delete").
+crear_workerOpenRead(Name, Idg)-> { workerOpenRead, [{fileName,Name},{idGlobal,Idg}] }.
 
-crear_workerOpenRead(Name, Idg)->error("crear worker Open Read").
+crear_workerOpenWrite(Name, Idg) -> { workerOpenWrite, [{fileName,Name},{idGlobal,Idg}] }.
 
-crear_workerOpenWrite(Name, Idg)->error("crear worker Open Write").
+crear_workerClose(Gfd, Idg) -> { workerClose, [{idGlobal,Idg},{fdGlobal,Gfd}] }.
 
-crear_workerClose(Gfd, Idg)->error("crear worker Close").
-
-crear_workerCloseSucc(W, C)->error("crear worker CloseSucc").
+crear_workerCloseSucc(W, C) ->  { workerCloseSucc, [] }.
