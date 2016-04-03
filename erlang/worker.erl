@@ -11,7 +11,7 @@ loop() ->
     
 
 % OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
-% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, wOpW, workerOpenRead, wSay, opsucc, workerClose, workerCloseSucc
+% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, workerOpenWrite, wSay, opsucc, workerClose, workerCloseSucc
 
 %getOwner( s: String ) = noowner | WorkerId
 %myFiles (file: String) = s : NoFile | Unused | Reading | Writing
@@ -127,15 +127,6 @@ proc ( userBye, Task )->
     ok.
 
 
-%actuarwOpr(o : Orden, name : String, idg : IdGlobal){
-%        case myFiles(name)
-%             NoFile  -> ResponderWorker(idg, archivoNoExiste() )
-%             Writing -> ResponderWorker(idg, archivoOcupado() )
-%             _       -> Fd = OpenRead(name,idg)
-%                        Orden = Crearopsucc( ClienteId(idg),  GLOBALFD )
-%                        EnviaralWorker( WorkerId(idg), Orden )
-%}
-
 proc (workerOpenRead, Task)->
     Name = task:fileName(Task),
     IdG  = task:idGlobal(Task),
@@ -148,6 +139,29 @@ proc (workerOpenRead, Task)->
                     openerfiles:registerOpen(Gfd, C)
                     Orden = task:crear_workerOpenSucc(Gfd, C),
                     comunic:enviarWorker(W,Orden)
+    ok.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
