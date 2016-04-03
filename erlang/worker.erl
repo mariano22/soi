@@ -10,8 +10,8 @@ loop() ->
     loop().
     
 
-% OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, clo, bye
-% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, wOpW, wOpR, wSay, opsucc, workerClose
+% OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
+% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, wOpW, workerOpenRead, wSay, opsucc, workerClose, workerCloseSucc
 
 %getOwner( s: String ) = noowner | WorkerId
 %myFiles (file: String) = s : NoFile | Unused | Reading | Writing
@@ -85,31 +85,57 @@ proc( userClose, Task)->
     Orden = task:crear_workerClose(Gfd, ids:makeIdGlobal(ids:myId(),C)),
     W     = ids:globalFdToWorker(Gfd),
     comunic:enviarWorker(W,Orden),
-    ok.
-
-%actuarwClo(o : Orden, gfd : GlobalFd, idg : IdGlobal){
-%	fd = GlobalFdToFd(gfd)
-%        case check FdToOwner fd == idg \
-%             false -> ResponderWorker(idg, errorPermisoDenegado())
-%             true  -> borrar de las tablas FdToHandle y FdToOwner las entradas con fd
-%                      closestatus(namefromfd(Fd))
-%                      Orden = crearCloSucc(myid(),cliente(idg))
-%                      EnviarAlWorker(worker(idg), Orden)
-%}
+    ok;
 
 
-proc( workerClose , Task ) ->
-    Name = task:fileName(Task),
-    Idg  = task:idGlobal(Task),
-    case localfiles:status(Name) of
-         noFile -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
-         unused -> tokenQueues:newDelete(Name),
-                   comunic:responderClienteRemoto(Idg, mensaje:archivoBorrado()),
-                   localfiles:delete(Name);
-         _      -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado())
+proc( workerClose, Task ) ->
+    Gfd = task:nameGlobal(Task),
+    Idg = ids:globalFdToIdg(Gfd),
+    Fd  = ids:globalFdToFd(Gfd),
+    case fdmanage:getOwner(Fd)==Idg of
+         false -> comunic:responderClienteRemoto(Idg, mensaje:permisoDenegado());
+         true  -> fdManage:unregisterFd(Fd),
+                  F     = task:fileName(Task),
+                  localfiles:close(F),
+                  C     = ids:idgToClient(Idg),
+                  Orden = task:crear_workerCloseSucc(ids:myId(), C),
+                  W     = ids:globalIdToWorker(Idg),
+                  comunic:enviarWorker(W,Orden)
     end,
     ok;
 
+proc( workerCloseSucc, Task )->
+    C     = task:cliente(Task),
+    Gfd   = task:nameGlobal(Task),
+    openedfiles:registerClose(Gfd),
+    comunic:responderCliente(C,mensaje:archivoCerrado()),
+    ok;
+
+
+proc ( userBye, Task )->
+    C        = task:cliente(Task),
+    Idg      = ids:makeIdGlobal(ids:myId(),C),
+    GlobalFD = openedfile:globalFdList(C),
+    Fun = fun(Gfd) -> 
+             Orden = task:crear_workerClose(Gfd, Idg),
+             W     = ids:globalFdToWorker(Gfd),
+             comunic:enviarWorker(W,Orden),
+             ok
+          end,
+    lists:foreach(Fun,GlobalFD),
+    ok.
+
+
+%actuarwOpr(o : Orden, name : String, idg : IdGlobal){
+%        case myFiles(name)
+%             NoFile  -> ResponderWorker(idg, archivoNoExiste() )
+%             Writing -> ResponderWorker(idg, archivoOcupado() )
+%             _       -> Fd = OpenRead(name,idg)
+%                        Orden = Crearopsucc( ClienteId(idg),  GLOBALFD )
+%                        EnviaralWorker( WorkerId(idg), Orden )
+%}
+
+proc (workerOpenRead, Task)->
 
 
 

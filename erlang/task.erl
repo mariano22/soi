@@ -20,3 +20,5 @@ crear_workerOpenRead(Name, Idg)->error("crear worker Open Read").
 crear_workerOpenWrite(Name, Idg)->error("crear worker Open Write").
 
 crear_workerClose(Gfd, Idg)->error("crear worker Close").
+
+crear_workerCloseSucc(W, C)->error("crear worker CloseSucc").

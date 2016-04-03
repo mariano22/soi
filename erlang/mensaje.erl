@@ -9,7 +9,9 @@ say(M) -> lists:concat(M).
 archivoNoExiste()    -> addArg("notExist",mErr()).
 archivoOcupado()     -> addArg("Ocuppied",mErr()).
 archivoYaExistente() -> addArg("Exist",mErr()).
+permisoDenegado()    -> addArg("AccessDenied",mErr()).
 
-
-archivoBorrado()     -> addArg("Deleted",mOk()).
 archivoCreado()      -> addArg("Create",mOk()).
+archivoBorrado()     -> addArg("Deleted",mOk()).
+archivoCerrado()     -> addArg("Close",mOk()).
+
