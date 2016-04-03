@@ -69,6 +69,7 @@ socket_process_loop(ClientSocket,WorkerSocket) ->
 	end.
 
 protocol_validation(List) -> case List of
+	["CON"] -> ok;
 	["LSD"] -> ok;
 	["DEL", _] -> ok;
 	["CRE", _] -> ok;
