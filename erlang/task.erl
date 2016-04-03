@@ -10,7 +10,7 @@ idGlobal({_, L}) -> element(2,lists:keyfind(idGlobal,1,L)).
 fdGlobal({_, L}) -> element(2,lists:keyfind(fdGlobal,1,L)).
 cliente({_, L}) -> element(2,lists:keyfind(cliente,1,L)).
 
-crear_workerDelete(Name, Idg)-> { workerDelete, [{fileName,Name},{idGlobal,Idg}]
+crear_workerDelete(Name, Idg)-> { workerDelete, [{fileName,Name},{idGlobal,Idg}] }.
 
 crear_workerOpenRead(Name, Idg)-> { workerOpenRead, [{fileName,Name},{idGlobal,Idg}] }.
 

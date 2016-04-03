@@ -90,8 +90,8 @@ proc( userClose, Task)->
 
 proc( workerClose, Task ) ->
     Gfd = task:fdGlobal(Task),
-    Idg = ids:globalFdToIdg(Gfd),
-    Fd  = ids:globalFdToFd(Gfd),
+    Idg = task:idGlobal(Task),
+    Fd  = ids:globalFdToLocalFd(Gfd),
     case fdmanage:getOwner(Fd)==Idg of
          false -> comunic:responderClienteRemoto(Idg, mensaje:permisoDenegado());
          true  -> fdManage:unregisterFd(Fd),
@@ -105,7 +105,7 @@ proc( workerClose, Task ) ->
     ok;
 
 proc( workerCloseSucc, Task )->
-    Idg   = task:globalFdToIdg(Task),
+    Idg   = task:idGlobal(Task),
     C     = globalIdToClient(Idg,)
     Gfd   = task:fdGlobal(Task),
     openedfiles:registerClose(Gfd),
@@ -133,7 +133,7 @@ proc (workerOpenRead, Task)->
     case localfiles:workerOpenRead(Name) of
          NoFile  -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
          Writing -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado());
-         _       -> Gfd = task:fdGlobal(Task),
+         _       -> Gfd = task:fdGlobal(Task), % esto no viene en le Task mariano
                     C   = globalIdToClient(IdG),
                     W   = globalIdToWorker(IdG),
                     openerfiles:registerOpen(Gfd, C)
