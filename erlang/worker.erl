@@ -80,7 +80,7 @@ proc( userOpenWrite, Task)->
 
 
 proc( userClose, Task)->
-    Gfd   = task:nameGlobal(Task),
+    Gfd   = task:fdGlobal(Task),
     C     = task:cliente(Task),
     Orden = task:crear_workerClose(Gfd, ids:makeIdGlobal(ids:myId(),C)),
     W     = ids:globalFdToWorker(Gfd),
@@ -89,7 +89,7 @@ proc( userClose, Task)->
 
 
 proc( workerClose, Task ) ->
-    Gfd = task:nameGlobal(Task),
+    Gfd = task:fdGlobal(Task),
     Idg = ids:globalFdToIdg(Gfd),
     Fd  = ids:globalFdToFd(Gfd),
     case fdmanage:getOwner(Fd)==Idg of
@@ -97,16 +97,17 @@ proc( workerClose, Task ) ->
          true  -> fdManage:unregisterFd(Fd),
                   F     = task:fileName(Task),
                   localfiles:close(F),
-                  C     = ids:idgToClient(Idg),
-                  Orden = task:crear_workerCloseSucc(ids:myId(), C),
+                  %C     = ids:globalIdToClient(Idg),
+                  Orden = task:crear_workerCloseSucc(Gfd, Idg),%crearWClo( gfd, makeIdGlobal( myId() , cliente(o) ) )
                   W     = ids:globalIdToWorker(Idg),
                   comunic:enviarWorker(W,Orden)
     end,
     ok;
 
 proc( workerCloseSucc, Task )->
-    C     = task:cliente(Task),
-    Gfd   = task:nameGlobal(Task),
+    Idg   = task:globalFdToIdg(Task),
+    C     = globalIdToClient(Idg,)
+    Gfd   = task:fdGlobal(Task),
     openedfiles:registerClose(Gfd),
     comunic:responderCliente(C,mensaje:archivoCerrado()),
     ok;
@@ -136,6 +137,16 @@ proc ( userBye, Task )->
 %}
 
 proc (workerOpenRead, Task)->
+    Name = task:fileName(Task),
+    IdG  = task:idGlobal(Task),
+    case localfiles:workerOpenRead(Name) of
+         NoFile -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
+         _      -> Gfd = task:fdGlobal(Task),
+                   C   = globalIdToClient(IdG),
+                   W   = globalIdToWorker(IdG),
+                   openerfiles:registerOpen(Gfd, C)
+                   Orden = task:crear_workerOpenSucc(Gfd, C),
+                   comunic:enviarWorker(W,Orden)
 
 
 
