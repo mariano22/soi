@@ -1,6 +1,12 @@
 -module(globalfiles).
 -compile(export_all).
 
+% Funciones:
+% archivosActuales () -> [String] (Lista los archivos que actualmente es la base de datos global del worker)
+% getOwner : String -> noOwner | WorkerId (Dado un archivo, si existe devuelve su dueño)
+% baja : String -> ok (Da de baja un archivo en la tabla)
+% alta : String -> ok (Da de alta un archivo en la tabla, asignandole un dueño)
+
 % DEBUG
 dbg([]) -> io:format("~n~n");
 dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),"} "])),
@@ -28,7 +34,7 @@ loop( L ) ->
 
 setUp() -> register( globalfilesserver, spawn(?MODULE,loop,[[]]) ).
 
-archivosActuales () -> globalfilesserver ! {self(), archivosActuales }, 
+archivosActuales() -> globalfilesserver ! {self(), archivosActuales }, 
                        receive X -> X end.
 getOwner(NameFile)  -> globalfilesserver ! {self(), getOwner, NameFile }, 
                        receive X -> X end.

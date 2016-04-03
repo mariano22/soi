@@ -1,6 +1,13 @@
 -module(localfiles).
 -compile(export_all).
 
+% Funciones
+% status : String -> noFile | reading | writting | unused (Dado un archivo, si esta localmente devuelve el estado)
+% delete : String -> ok (Dado un archivo lo borra de la tabla de los locales)
+% create : String -> ok (Dado un archivo lo crea en la tabla de los locales, inicialmente unused)
+% openR : String -> ok (Suma un lector al archivo)
+% openW : String -> ok (Suma un escritor al archivo, el llamante se asegura que nunca halla mas de uno)
+% close : String -> ok (Resta un usuario al archivo, detectando si esta siendo leido o escrito)
 
 % DEBUG
 dbg([]) -> io:format("~n~n");
