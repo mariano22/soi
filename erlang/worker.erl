@@ -167,22 +167,54 @@ proc(workerOpenSucc, Task)->
     W   = ids:globalFdToWorker(Gfd),
     IdG = ids:makeIdGlobal(W,C),
     comunic:responderClienteRemoto(IdG, mensaje:archivoOcupado()),
-    ok.
-
-%actuarRead(o : Orden, gfd : GlobalFd, sz : Int) {
-%	W=globalFdToWorker gfd
-%	idg = makeIdGlobal( myId() , cliente(o) )
-%	orden=crearwRead(sz, gfd, idg)
-%	enviarAWorker(W,orden)
-%}
+    ok;
 
 proc(userRead, Task)->
     Gfd = task:fdGlobal(Task),
     C   = task:cliente(Task),
-    IdG = makeIdGlobal(myId(),C)
+    Sz  = task:sizeTxt(Task),
+    IdG = ids:makeIdGlobal(ids:myId(),C),
     W   = ids:globalFdToWorker(Gfd),
     Orden = task:crear_workerWorkerRead(Sz, Gfd, IdG),
-    comunic:responderClienteRemoto(W,Orden)
+    comunic:responderClienteRemoto(W,Orden),
+    ok;
+
+proc(userWrite, Task)->
+    Gfd = task:fdGlobal(Task),
+    C   = task:cliente(Task),
+    IdG = ids:makeIdGlobal(ids:myId(),C),
+    W   = ids:globalFdToWorker(Gfd),
+    Orden = task:crear_workerWorkerWrite(Gfd, IdG),
+    comunic:responderClienteRemoto(W,Orden),
+    ok;
+
+proc(workerRead, Task)->
+    Gfd = task:fdGlobal(Task),
+    IdG = task:idGlobal(Task),
+    Fd  = ids:globalFdToLocalFd(Gfd),
+    case fdmanage:getOwner(Fd)==IdG of
+         false -> comunic:responderClienteRemoto( IdG, mensaje:permisoDenegado());
+         true  -> Handle = fdmanage:getHandle(Fd),
+                  Sz     = task:sizeTxt(Task),
+                  Txt    = realfs:read(Handle,Sz),
+                  comunic:responderClienteRemoto( IdG, mensaje:archivoReadSucc(Txt))
+    end,
+    ok;
+
+proc(workerWrite, Task)->
+    Gfd = task:fdGlobal(Task),
+    IdG = task:idGlobal(Task),
+    Fd  = ids:globalFdToLocalFd(Gfd),
+    case fdmanage:getOwner(Fd)==IdG of
+         false -> comunic:responderClienteRemoto( IdG, mensaje:permisoDenegado());
+         true  -> Handle = fdmanage:getHandle(Fd),
+                  Data   = task:strTxt(Task),
+                  realfs:write ( Handle, Data),
+                  comunic:responderClienteRemoto( IdG, mensaje:archivoWriteSucc())
+    end,
+    ok.
+
+
 
 
 

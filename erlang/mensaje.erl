@@ -14,4 +14,6 @@ permisoDenegado()    -> addArg("AccessDenied",mErr()).
 archivoCreado()      -> addArg("Create",mOk()).
 archivoBorrado()     -> addArg("Deleted",mOk()).
 archivoCerrado()     -> addArg("Close",mOk()).
+archivoWriteSucc()   -> addArg("Writed",mOk()).
+archivoReadSucc(Txt) -> addArg(Txt,mOk()).
 
