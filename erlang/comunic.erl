@@ -14,7 +14,9 @@ test(ID) ->
     setUp(9000+ID,8000+ID),
     testloop().
 testloop() -> 
-    receive X -> io:format("~p~n~n",[X]) end,
+    receive X -> io:format("~p~n~n",[X]),
+                 responderCliente(task:cliente(X),mensaje:mOk())
+    end,
     testloop().
 
 % Comienza a escuchar en el puerto que le corresponda al worker.
@@ -29,7 +31,8 @@ setUp(InternPort,ExternPort) ->
 
 externInbox(ListenSock,IdCon) ->
     {ok,Socket} = gen_tcp:accept(ListenSock),
-	spawn(?MODULE,externInboxSlave,[Socket,IdCon]),
+	PS = spawn(?MODULE,externInboxSlave,[Socket,IdCon]),
+    localconections:newC(IdCon,PS),
 	externInbox(ListenSock,IdCon+1).
 
 internInbox(ListenSock) ->
@@ -41,11 +44,10 @@ internInbox(ListenSock) ->
 % Si Type es intern, se está comunicando con otro worker, caso en el cual se retransmite el mensaje al worker, sin esperarse respuesta alguna.
 % Agrega el encabezado PS o WRK dependiendo si el mensaje viene de una fuente externa o de otro worker respectivamente.
 externInboxSlave(Socket,IdCon) ->
-    localconections:newC(IdCon,self()),
 	Data = sockaux:gets(Socket),
     if Data==error -> gen_tcp:close(Socket), localconections:delC(IdCon);
     true -> ParsedData = parser:parse(Data),
-             Task = task:fromUserData(ParsedData),
+             Task = task:fromUserData(ParsedData,IdCon),
              mainWorker ! Task,
              receive X -> ok end,
              gen_tcp:send(Socket,X),
@@ -66,7 +68,8 @@ internInboxSlave(Socket) ->
 responderCliente(Cid, M) ->
     case localconections:find(Cid) of
         noClient -> error("Cliente no encontrado!");
-        P -> P ! mensaje:say(M)
+        P -> %io:format("Mensaje: ~p~n",[mensaje:say(M)]), DEBUG
+             P ! mensaje:say(M)
     end.
 
 test2(P) -> enviarTask('127.0.0.1',P,{asd}).
