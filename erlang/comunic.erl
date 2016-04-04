@@ -4,15 +4,16 @@
 
 -module(comunic).
 -compile(export_all).
--import(parser,[parser/1]).
+-import(parser,[parse/1]).
 -import(sockaux,[sockaux_gets/1]).
 
-test() ->
+test(ID) ->
+    localconections:setUp(),
     register(mainWorker,self()),
-    setUp(9001,8001),
+    setUp(9000+ID,8000+ID),
     testloop().
 testloop() -> 
-    receive X -> io:format(task:toString(X)++"~n~n") end,
+    receive X -> io:format("~p~n~n",[X]) end,
     testloop().
 
 % Comienza a escuchar en el puerto que le corresponda al worker.
@@ -42,8 +43,8 @@ externInboxSlave(Socket,IdCon) ->
     localconections:newC(IdCon,self()),
 	Data = sockaux:gets(Socket),
     if Data==error -> gen_tcp:close(Socket), localconections:delC(IdCon);
-    true -> ParsedData = parser(Data),
-             Task = task:fromString(ParsedData),
+    true -> ParsedData = parser:parse(Data),
+             Task = task:fromUserData(ParsedData),
              mainWorker ! Task,
              receive X -> ok end,
              gen_tcp:send(Socket,X),
@@ -55,8 +56,7 @@ externInboxSlave(Socket,IdCon) ->
 internInboxSlave(Socket) ->
 	Data = sockaux:gets(Socket),
     if Data==error -> gen_tcp:close(Socket);
-    true -> ParsedData = parser(Data),
-             Task = task:fromString(ParsedData),
+    true ->  Task = task:fromList(Data),
              mainWorker ! Task,
              gen_tcp:close(Socket)
     end.

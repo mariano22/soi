@@ -7,12 +7,9 @@
 % delC :  Clientid      -> ok  (borra un cliente, porque se desconecto)
 
 % DEBUG
-dbg([]) -> io:format("~n~n");
-dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),"} "])),
-              dbg(L).
 
 loop( L ) ->
-    %dbg(L),
+    io:format("~p~n~n",[L]),
     receive
         {P,  newC, Cid,Pid }  ->   Lp = [{Cid,Pid}|L],
                                    P ! ok,

@@ -22,4 +22,7 @@ crear_workerClose(Gfd, Idg) -> { workerClose, [{idGlobal,Idg},{fdGlobal,Gfd}] }.
 crear_workerCloseSucc(W, C) ->  { workerCloseSucc, [] }.
 
 
+toList(X) -> binary_to_list(term_to_binary(X)).
+fromList(X) -> binary_to_term(list_to_binary(X)).
 
+fromUserData(List) -> {userTask}.
