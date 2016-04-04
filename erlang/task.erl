@@ -22,7 +22,20 @@ crear_workerClose(Gfd, Idg) -> { workerClose, [{idGlobal,Idg},{fdGlobal,Gfd}] }.
 crear_workerCloseSucc(W, C) ->  { workerCloseSucc, [] }.
 
 
-toList(X) -> binary_to_list(term_to_binary(X)).
-fromList(X) -> binary_to_term(list_to_binary(X)).
-
+toData(X) -> term_to_binary(X).
+fromData(X) -> binary_to_term(X).
+% OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
 fromUserData(List) -> {userTask}.
+%    case List of
+%        ["CON"] -> { userCon, [] };
+%        ["LSD"] -> { userLsd, [] };
+%        ["DEL", NameFile] -> {userDelete, [{fileName,NameFile}]};
+%        ["CRE", NameFile] -> {userCreate, [{fileName,NameFile}]};
+%        ["OPNR", NameFile] -> {userOpenRead, [{fileName,NameFile}]};
+%        ["OPNW", NameFile] -> {userOpenWrite, [{fileName,NameFile}]};
+%        ["WRT", "FD", _, "SIZE", _, _] -> ok;
+%        ["REA", "FD", _, "SIZE", _] -> ok;
+%        ["CLO", "FD", _] -> ok;
+%        ["BYE"] -> exit_signal;
+%        _       -> error("Esto no debe suceder")
+	%end.

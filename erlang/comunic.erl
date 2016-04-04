@@ -20,7 +20,7 @@ testloop() ->
 % Comienza a escuchar en el puerto que le corresponda al worker.
 setUp(InternPort,ExternPort) ->
 		{ok,ExternListenSock} = gen_tcp:listen(ExternPort, [list, {active,false}]),
-		{ok,InternListenSock} = gen_tcp:listen(InternPort, [list, {active,false}]),
+		{ok,InternListenSock} = gen_tcp:listen(InternPort, [binary,{packet,4}, {active,false}]),
 		spawn(?MODULE,externInbox,[ExternListenSock,0]),
 		spawn(?MODULE,internInbox,[InternListenSock]),
 		ok.
@@ -57,8 +57,8 @@ externInboxSlave(Socket,IdCon) ->
 internInboxSlave(Socket) ->
 	{ok,Data} = gen_tcp:recv(Socket,0), % MODIFICAR!
     if Data==error -> gen_tcp:close(Socket);
-    true ->  io:format("~p~n",[Data]),
-             Task = task:fromList(Data),
+    true ->  %DEBUG io:format("~p~n",[Data]),
+             Task = task:fromData(Data),
              mainWorker ! Task,
              gen_tcp:close(Socket)
     end.
@@ -72,10 +72,10 @@ responderCliente(Cid, M) ->
 test2(P) -> enviarTask('127.0.0.1',P,{asd}).
 
 enviarTask(WorkerIP,WorkerPort,Task) ->
-    io:format("~p~p~n",[WorkerIP,WorkerPort]),
-	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerPort,[list, {active,false}]),
-    SendData = task:toList(Task),
-    io:format("~p~n",[SendData]),
+    %DEBUGio:format("~p~p~n",[WorkerIP,WorkerPort]),
+	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerPort,[binary,{packet,4}, {active,false}]),
+    SendData = task:toData(Task),
+    %DEBUG io:format("~p~n",[SendData]),
 	gen_tcp:send(Socket,SendData),
 	gen_tcp:close(Socket),
     ok.
