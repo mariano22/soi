@@ -14,9 +14,10 @@
 % Lee la lista de Workers.
 % Spawnea el proceso encargado de designar a los Workers.
 % Abre la conexión e inicia el loop para aceptar conexiones entrantes
-init() ->
+setUp() ->
 	{ok,ListenSock} = gen_tcp:listen(?DISPATCHER_LISTEN_PORT, [list, {active,false}]),
-	accept_loop(ListenSock).
+	spawn(?MODULE,accept_loop,[ListenSock]),
+    ok.
 
 % Espera una conexión entrante y crea un proceso que ejecute socket_process_start que se ocupe de dicho cliente
 accept_loop(ListenSock) ->

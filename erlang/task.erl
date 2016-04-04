@@ -1,5 +1,6 @@
 -module(task).
 -compile(export_all).
+-import(parser,[parser/1]).
 
 
 % Tasks
@@ -19,3 +20,6 @@ crear_workerOpenWrite(Name, Idg) -> { workerOpenWrite, [{fileName,Name},{idGloba
 crear_workerClose(Gfd, Idg) -> { workerClose, [{idGlobal,Idg},{fdGlobal,Gfd}] }.
 
 crear_workerCloseSucc(W, C) ->  { workerCloseSucc, [] }.
+
+
+
