@@ -4,9 +4,10 @@ Lista de funciones:
 myId() : WorkerId
 ordenTipo( o : Orden) : OrdenName
 cliente( o : Orden ) : ClientId
-OrdenName == lsd, del, cre, opr, opw, wrt, rea, clo, bye
 
-OrdenWorkerName == wDel, wOpr, wWrite, wRead, wOpW, wOpR, wSay, wOpnSucc
+OrdenName == lsd, del, cre, opr, opw, wrt, rea, clo, bye
+OrdenWorkerName == wDel, wOpr, wWrite, wRead, wOpW, wOpR, wSay, opsucc
+
 crearOWdel( n : String, id : IdGlobal) : OrdenWorker
 crearOWOpr( n : String, id : IdGlobal) : OrdenWorker
 crearOWOpw( n : String, id : IdGlobal) : OrdenWorker
@@ -14,7 +15,6 @@ crearW( file:String , cadena:String , id: IdGlobal) :OrdenWorker
 crearR( file:String , id: IdGlobal, sz : Int) : OrdenWorker
 crearClo( file:String , id: IdGlobal) : OrdenWorker
 crearSay( m : mensaje , id: ClientId) : OrdenWorker
-crearOpenSucc( idg : IdGlobal ) : OrdenWorker
 
 makeIdGlobal( w : WorkerId, c : ClientId) : GlobalId
 
@@ -25,6 +25,7 @@ addArg( c : Mensaje, l : String ) : Mensaje
 archivoNoExiste() : Mensaje { return mensajeErr("fileNotExist"); }
 identidicadorNoExiste():Mensaje { return mensajeErr("idfNotExist"); }
 archivoOcupado():Mensaje { return mensajeErr("fileInUse"); }
+errorPermisoDenegado():Mensaje { return mensajeErr("AccessDenied"); }
 
 ResponderCliente( c : ClientId, m : Mensaje )
 EnviarAWorker( c : WorkerId, m : OrdenWorker )
@@ -32,9 +33,9 @@ ResponderWorker(idg : IDGlobal, m : Mensaje )
 
 archivosActuales() : [ String ]
 getOwner( s: String ) = noowner | WorkerId
-getFile( fd: FileId ) = noFile | String
 
 PonerEnColaCreate (name : String, idc : IdCliente )
+PonerEnColaDelete (name : String )
 OpenWrite(name : String,idg : IdGlobal) abre el archivo para idg y conserva el identificador de archivos del fs
 fileHandle(name : String) : HandleFile devuelve el handle del archivo del fs
 Write(h : HandleFile, txt:String) me escribe el texto en el archivo manejado
@@ -43,97 +44,157 @@ myFiles (file: String) = s : NoFile | Unused | Reading | Writing
 
 ACTUAR
 ======
-
+HECHA
 actuarLsd(o : Orden) {
             mensaje = fold (l->addArg(c,l)) mensajeOk() archivosActuales()
             ResponderCliente( cliente(o), mensaje)
 }
+HECHA
 actuarDel(o : Orden, name : String) {
         case getOwner(name) 
             noowner -> ResponderCliente(cliente(o), mensajeErr())
-            W -> orden = crearOWdel( name, makeIdGlobal( myId() , cliente(o) ) )
+            W -> orden = crearWdel( name, makeIdGlobal( myId() , cliente(o) ) )
                  EnviarAWorker( W, orden)
 }
+HECHA
+actuarwDel(o : Orden,name : String, idg : IdGlobal){
+        case myFiles(name)
+             NoFile -> ResponderWorker(idg, archivoNoExiste() )
+             Unused -> PonerEnColaDelete (name)
+                       RespoderWorker(idg, archivoBorrado() )
+                       actualizar base de datos local (status)
+             _      -> ResponderWorker(idg, archivoOcupado() )
+}
+HECHA
 actuarCre(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> PonerEnColaCreate (name,cliente (o))
             W -> ResponderCliente(cliente(o), archivoNoExiste() ))
 }
-
+HECHA
 actuarOpr(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
             W -> crearOWOpr(name, makeIdGlobal( myId() , cliente(o) ) )
                  EnviarAWorker( W, orden )
 }
-
+HECHA
 actuarOpW(o : Orden, name : String) {
         case getOwner(name)            
             noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-            W       -> Orden = crearOpW( name, makeIdGlobal( myId() , cliente(o) )
+            W       -> Orden = crearWOpW( name, makeIdGlobal( myId() , cliente(o) ))
                        EnviarAWorker( W, orden)		
 }
-
-ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
-actuarWrt(o : Orden, fd : FileId, txt : String) {
-        case getFile(fd)
-             noFile -> ResponderCliente(cliente(o), identidicadorNoExiste() )
-             file   -> case getOwner(file)
-                            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-                            W       -> Orden = crearW( file, txt, makeIdGlobal( myId() , cliente(o) )
-                                       EnviarAWorker( W, orden)		
+HECHA
+actuarClo(o : Orden, gfd : GlobalFd) {
+      W = GlobalFdToWorker(gdf)
+      orden = crearWClo( gfd, makeIdGlobal( myId() , cliente(o) ) )
+      EnviarAWorker( W, orden)
+}
+HECHA
+actuarwClo(o : Orden, gfd : GlobalFd, idg : IdGlobal){
+	fd = GlobalFdToFd(gfd)
+        case check FdToOwner fd == idg \
+             false -> ResponderWorker(idg, errorPermisoDenegado())
+             true  -> borrar de las tablas FdToHandle y FdToOwner las entradas con fd
+                      closestatus(namefromfd(Fd))
+                      Orden = crearCloSucc(myid(),cliente(idg))
+                      EnviarAlWorker(worker(idg), Orden)
+}
+HECHA
+actuarwCloSucc(o:Orden, w : workerId, c : Clientid) {
+        minusOpened(c,w)
+        ResponderCliente(c, cloSucc())
+}
+HECHA
+actuarBye(o : Orden) {
+        WorkerList = WorkOpened(client(o))
+        para todo w en WorkerList:
+                Orden = creaWBye( makeidg( cliente(o), myid())  )
+                EnviarAlWorker(W,Orden)
 }
 
-ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
-actuarRead(o : Orden, fd : FileId, sz : Int) {
-        case getFile(fd)
-             noFile -> ResponderCliente(cliente(o), identidicadorNoExiste() )
-             file   -> case getOwner(file)
-                            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-                            W       -> Orden = crearR( file, makeIdGlobal( myId() , cliente(o), sz )
-                                       EnviarAWorker( W, orden)		
-}
-
-ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
-actuarClo(o : Orden, fd : FileId) {
-        case getFile(fd)
-             noFile -> ResponderCliente(cliente(o), identidicadorNoExiste() )
-             file   -> case getOwner(file)
-                            noowner -> ResponderCliente(cliente(o), archivoNoExiste() )
-                            W       -> Orden = crearClo( file, makeIdGlobal( myId() , cliente(o) )
-                                       EnviarAWorker( W, orden)		
-}
-
-actuarwDel(o : Orden,name : String, idg : IdGlobal){
-        case myFiles(name)
-             NoFile -> ResponderWorker(idg, archivoNoExiste() )
-             Unused -> PonerEnColaDelete (name,idg)
-             _      -> ResponderWorker(idg, archivoOcupado() )
-
-}
-
-ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+HECHA
 actuarwOpr(o : Orden, name : String, idg : IdGlobal){
         case myFiles(name)
              NoFile  -> ResponderWorker(idg, archivoNoExiste() )
              Writing -> ResponderWorker(idg, archivoOcupado() )
-             _       -> OpenWrite(name,idg)
-                        Orden = crearOpenSucc( idg )
-                        EnviarAWorker( WId(idg) , Orden )		
+             _       -> Fd = OpenRead(name,idg)
+                        Orden = Crearopsucc( ClienteId(idg),  GLOBALFD )
+                        EnviaralWorker( WorkerId(idg), Orden )
 }
-ESTA FUNCION ESTA MAL PQ CAMBIO EL MANEJO DE LOS FD
+HECHA
+OpenRead(name : String, idg : IdGlobal) {
+	Fd = newFd() /* provee un nuevo fd unico en el worker */
+	Handle = AbrirLinux(name, modolecutra)
+	Agregar (Fd , Handle) a FdToHandle (tabla global)
+	Agregar (Fd , idg) a FdToOwner (tabla global)
+        setStatus(name, Reading)
+}
+HECHA
+actuarwOpW(o : Orden, name : String, idg : IdGlobal){
+        case myFiles(name)
+             NoFile            -> ResponderWorker(idg, archivoNoExiste() )
+             Writing | Reading -> ResponderWorker(idg, archivoOcupado() )
+             Unused            -> Fd = OpenWrite(name,idg)
+                                  Orden = Crearopsucc( ClienteId(idg), GLOBALFD )
+                                  EnviaralWorker( WorkerId(idg), Orden )
+}
+HECHA--------------------------------------------------------------------------------Hecho?
+actuarwOpSucc(o : Orden,  c : ClientIdgfd, g : GlobalFd ){
+        AddOpened(c,GFDToWorker(gactuarRead(o : Orden, gfd : GlobalFd, sz : Int) {
+	W=globalFdToWorker gfd
+	idg = makeIdGlobal( myId() , cliente(o) )
+	orden=crearwRead(sz, gfd, idg)
+	enviarAWorker(W,orden)
+}))
+        ResponderCliente( c, mensaje(FD, g) )
+}
+HECHA
+actuarRead(o : Orden, gfd : GlobalFd, sz : Int) {
+	W=globalFdToWorker gfd
+	idg = makeIdGlobal( myId() , cliente(o) )
+	orden=crearwRead(sz, gfd, idg)
+	enviarAWorker(W,orden)
+}
+HECHA
+actuarWrt(o : Orden, gfd : GlobalFd, txt : String) {
+	W=globalFdToWorker gfd
+	idg = makeIdGlobal( myId() , cliente(o) )
+	orden=crearwWrite(txt,gfd, idg)
+	enviarAWorker(W,orden)
+}
+HECHA
+actuarWRead(sz: Int, gfd:GlobalFd, idg:IdGlobal){	
+	fd = GlobalFdToFd(gfd)
+	case check FdToOwner fd == idg \
+             false -> ResponderWorker(idg, errorPermisoDenegado())
+	     true  ->
+		     file  = edidentificador tomado de la tabla fdToHandle
+	             txt   = readLinux(file, sz)
+                     ResponderWorker( idg , readSucc( txt ) )
+}
+HECHA
 actuarwWrite(o : Orden, name : String, cadena : String, idg : IdGlobal){
-        case fileHandle(name,idg)
-             NoFile  -> ResponderWorker(idg, archivoNoExiste() )
-             Handle  -> Write(Handle,cadena)
+	fd = GlobalFdToFd(gfd)
+	case check FdToOwner fd == idg \
+             false -> ResponderWorker(idg, errorPermisoDenegado())
+	     true  ->
+		     file  = edidentificador tomado de la tabla fdToHandle
+	             writeLinux(file, cadena)
+                     ResponderWorker( idg , writeSucc( ) )
 }
-actuarwRead(){
 
-}
-actuarwOpW(){
+procesarToken() {
+        ListaBajas = getListaBajasToken();
+        ListaAltas = getListaAltasToken();
+        Filtrar los que tienen WorkerId == myid() (ambas listas)
+        Los de la cola de delete ponerlos en ListaBajas
+        Los de mi cola de create que estene en ListaAltras contestar que no se puede
+        Los de mi cola de create que NO estene en ListaAltras contestar que se pudo crear (antes modificar estado mi BD local)  y Agregar a lista de altas
 
+        Modificar estado global con las listas Alta/Baja
+        pasar el token
 }
-actuarwOpR(){
 
-}
 
