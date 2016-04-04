@@ -10,7 +10,7 @@ loop() ->
     loop().
     
 
-% OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
+% OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, userWrite, userRead, userClose, userBye
 % OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, workerOpenWrite, workerSay, opsucc, workerClose, workerCloseSucc
 
 %getOwner( s: String ) = noowner | WorkerId
@@ -97,8 +97,7 @@ proc( workerClose, Task ) ->
          true  -> fdManage:unregisterFd(Fd),
                   F     = task:fileName(Task),
                   localfiles:close(F),
-                  %C     = ids:globalIdToClient(Idg),
-                  Orden = task:crear_workerCloseSucc(Gfd, Idg),%crearWClo( gfd, makeIdGlobal( myId() , cliente(o) ) )
+                  Orden = task:crear_workerCloseSucc(Gfd, Idg),
                   W     = ids:globalIdToWorker(Idg),
                   comunic:enviarWorker(W,Orden)
     end,
@@ -106,7 +105,7 @@ proc( workerClose, Task ) ->
 
 proc( workerCloseSucc, Task )->
     Idg   = task:idGlobal(Task),
-    C     = globalIdToClient(Idg,)
+    C     = ids:globalIdToClient(Idg),
     Gfd   = task:fdGlobal(Task),
     openedfiles:registerClose(Gfd),
     comunic:responderCliente(C,mensaje:archivoCerrado()),
@@ -124,63 +123,66 @@ proc ( userBye, Task )->
              ok
           end,
     lists:foreach(Fun,GlobalFD),
-    ok.
-
-
-proc (workerOpenRead, Task)->
-    Name = task:fileName(Task),
-    IdG  = task:idGlobal(Task),
-    case localfiles:workerOpenRead(Name) of
-         NoFile  -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
-         Writing -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado());
-         _       -> Gfd = OpenRead(Name,Idg),
-                    C   = globalIdToClient(IdG),
-                    W   = globalIdToWorker(IdG),
-                    openerfiles:registerOpen(Gfd, C)
-                    Orden = task:crear_workerOpenSucc(Gfd, C),
-                    comunic:enviarWorker(W,Orden)
     ok;
 
-%OpenRead(name : String, idg : IdGlobal) {
-%	Fd = newFd() /* provee un nuevo fd unico en el worker */
-%	Handle = AbrirLinux(name, modolecutra)
-%	Agregar (Fd , Handle) a FdToHandle (tabla global)
-%	Agregar (Fd , idg) a FdToOwner (tabla global)
-%        Agregar (Fd, name) a FdToName
-%        setStatus(name, Reading)
 
 proc (workerOpenRead, Task)->
     Name = task:fileName(Task),
     IdG  = task:idGlobal(Task),
-    case localfiles:workerOpenRead(Name) of
-         NoFile  -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
-         Writing -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado());
-         _       -> Gfd = OpenRead(Name,Idg),
-                    C   = globalIdToClient(IdG),
-                    W   = globalIdToWorker(IdG),
-                    openerfiles:registerOpen(Gfd, C)
+    case localfiles:status(Name) of
+         noFile  -> comunic:responderClienteRemoto(IdG, mensaje:archivoNoExiste());
+         writing -> comunic:responderClienteRemoto(IdG, mensaje:archivoOcupado());
+         _       -> Handle  = realfs:openr(Name),% openr dado un Name te devuelve un handle
+                    LocalFd = fdmanage:registerFd(IdG,Handle),
+                    localfiles:openR(Name),
+                    Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
+                    C   = ids:globalIdToClient(IdG),
+                    W   = ids:globalIdToWorker(IdG),
                     Orden = task:crear_workerOpenSucc(Gfd, C),
                     comunic:enviarWorker(W,Orden)
+    end,
+    ok;
+
+proc (workerOpenWrite, Task)->
+    Name = task:fileName(Task),
+    IdG  = task:idGlobal(Task),
+    case localfiles:status(Name) of
+         noFile  -> comunic:responderClienteRemoto(IdG, mensaje:archivoNoExiste());
+         unused  -> Handle  = realfs:openr(Name),% openr dado un Name te devuelve un handle
+                    LocalFd = fdmanage:registerFd(IdG,Handle),
+                    localfiles:openW(Name),
+                    Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
+                    C   = ids:globalIdToClient(IdG),
+                    W   = ids:globalIdToWorker(IdG),
+                    Orden = task:crear_workerOpenSucc(Gfd, C),
+                    comunic:enviarWorker(W,Orden);
+         _       -> comunic:responderClienteRemoto(IdG, mensaje:archivoOcupado())
+    end,
+    ok;
+
+proc(workerOpenSucc, Task)->
+    Gfd = ids:fdGlobal(Task),
+    C   = ids:cliente(Task),
+    openedfiles:registerOpen(Gfd,C),
+    W   = ids:globalFdToWorker(Gfd),
+    IdG = ids:makeIdGlobal(W,C),
+    comunic:responderClienteRemoto(IdG, mensaje:archivoOcupado()),
     ok.
 
+%actuarRead(o : Orden, gfd : GlobalFd, sz : Int) {
+%	W=globalFdToWorker gfd
+%	idg = makeIdGlobal( myId() , cliente(o) )
+%	orden=crearwRead(sz, gfd, idg)
+%	enviarAWorker(W,orden)
+%}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+proc(userRead, Task)->
+    Gfd = task:fdGlobal(Task),
+    C   = task:cliente(Task),
+    IdG = makeIdGlobal(myId(),C)
+    W   = ids:globalFdToWorker(Gfd),
+    Orden = task:crear_workerWorkerRead(Sz, Gfd, IdG),
+    comunic:responderClienteRemoto(W,Orden)
 
 
 
