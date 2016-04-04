@@ -87,12 +87,6 @@ enviarTask(WorkerIP,WorkerPort,Task) ->
 enviarWorker( WId , Task ) -> 
     {_,WPort,WIP} = lists:keyfind(WId,1,?WORKER_LIST),
     enviarTask(WIP,WPort,Task).
-    
-responderClienteRemoto( Idg, Msj) -> 
-    WId = ids:globalIdToWorker(Idg),
-    CId = ids:globalIdToClient(Idg),
-    T = task:crear_workerSay(CId, Msj ),
-    enviarWorker(WId, T).
 
 
 

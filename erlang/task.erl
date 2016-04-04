@@ -10,9 +10,10 @@ name({TT, _}) -> TT.
 fileName({_, L}) -> element(2,lists:keyfind(fileName,1,L)).
 idGlobal({_, L}) -> element(2,lists:keyfind(idGlobal,1,L)).
 fdGlobal({_, L}) -> element(2,lists:keyfind(fdGlobal,1,L)).
-cliente({_, L}) -> element(2,lists:keyfind(cliente,1,L)).
-sizeTxt({_, L}) -> element(2,lists:keyfind(sizeTxt,1,L)).
-strTxt({_, L}) -> element(2,lists:keyfind(strTxt,1,L)).
+cliente({_, L})  -> element(2,lists:keyfind(cliente,1,L)).
+sizeTxt({_, L})  -> element(2,lists:keyfind(sizeTxt,1,L)).
+strTxt({_, L})   -> element(2,lists:keyfind(strTxt,1,L)).
+mensaje({_, L})  -> element(2,lists:keyfind(mensaje,1,L)).
 
 crear_workerDelete(Name, Idg)-> { workerDelete, [{fileName,Name},{idGlobal,Idg}] }.
 
