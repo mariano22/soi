@@ -6,6 +6,7 @@
 -compile(export_all).
 -import(parser,[parse/1]).
 -import(sockaux,[sockaux_gets/1]).
+-include("worker_list.hrl").
 
 test(ID) ->
     localconections:setUp(),
@@ -54,9 +55,10 @@ externInboxSlave(Socket,IdCon) ->
     end.
 
 internInboxSlave(Socket) ->
-	Data = sockaux:gets(Socket),
+	{ok,Data} = gen_tcp:recv(Socket,0), % MODIFICAR!
     if Data==error -> gen_tcp:close(Socket);
-    true ->  Task = task:fromList(Data),
+    true ->  io:format("~p~n",[Data]),
+             Task = task:fromList(Data),
              mainWorker ! Task,
              gen_tcp:close(Socket)
     end.
@@ -67,17 +69,27 @@ responderCliente(Cid, M) ->
         P -> P ! mensaje:say(M)
     end.
 
+test2(P) -> enviarTask('127.0.0.1',P,{asd}).
+
+enviarTask(WorkerIP,WorkerPort,Task) ->
+    io:format("~p~p~n",[WorkerIP,WorkerPort]),
+	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerPort,[list, {active,false}]),
+    SendData = task:toList(Task),
+    io:format("~p~n",[SendData]),
+	gen_tcp:send(Socket,SendData),
+	gen_tcp:close(Socket),
+    ok.
+
 % Se encarga de mandar un mensaje a un Worker determinado
-%worker_send(WorkerID, SendData, WorkerInfo) ->
-	%io:format("Buscando al worker: ~p~n~p~n",[WorkerID,WorkerInfo]), DEBUG
-%	WorkerIP = worker_info:worker_ip(WorkerInfo,WorkerID),
-	%io:format("Worker encontrado: ~p ~p~n", [WorkerIP,WorkerID+?WORKER_START_INTERN_PORT]), DEBUG
-%	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerID+?WORKER_START_INTERN_PORT,[list, {active,false}]),
-	%io:format("Conexion satisfactoria, se enviara ~p~n",[SendData]), DEBUG
-%	gen_tcp:send(Socket,SendData),
-%	gen_tcp:close(Socket),
-%	ok.
+enviarWorker( WId , Task ) -> 
+    {_,WPort,WIP} = lists:keyfind(WId,1,?WORKER_LIST),
+    enviarTask(WIP,WPort,Task).
+    
+responderClienteRemoto( Idg, Msj) -> 
+    WId = ids:globalIdToWorker(Idg),
+    CId = ids:globalIdToClient(Idg),
+    T = task:crear_workerSay(CId, Msj ),
+    enviarWorker(WId, T).
 
-responderClienteRemoto(_, _) -> error("responderClienteRemoto").
 
-enviarWorker( _ , _ )->error ("No definido enviarWorker~n").
+

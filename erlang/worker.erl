@@ -11,7 +11,7 @@ loop() ->
     
 
 % OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
-% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, workerOpenWrite, wSay, opsucc, workerClose, workerCloseSucc
+% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, workerOpenWrite, workerSay, opsucc, workerClose, workerCloseSucc
 
 %getOwner( s: String ) = noowner | WorkerId
 %myFiles (file: String) = s : NoFile | Unused | Reading | Writing

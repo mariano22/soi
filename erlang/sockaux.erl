@@ -12,3 +12,4 @@ gets(Sock) -> case gen_tcp:recv(Sock,1) of
 									end;
 					  _ -> error
 					  end.
+
