@@ -15,16 +15,8 @@
 % Spawnea el proceso encargado de designar a los Workers.
 % Abre la conexión e inicia el loop para aceptar conexiones entrantes
 init() ->
-	register(pid_workers_list, spawn(?MODULE,worker_list,[?WORKER_LIST]) ),
 	{ok,ListenSock} = gen_tcp:listen(?DISPATCHER_LISTEN_PORT, [list, {active,false}]),
 	accept_loop(ListenSock).
-
-% Proceso encargado de asignar worker's de manera aleatoria
-worker_list(WorkersList) ->
-	receive
-		{one_worker_request,Pid} -> Pid ! lists:nth( random:uniform(length(WorkersList)) , WorkersList )
-	end,
-	worker_list(WorkersList).
 
 % Espera una conexión entrante y crea un proceso que ejecute socket_process_start que se ocupe de dicho cliente
 accept_loop(ListenSock) ->
@@ -32,13 +24,10 @@ accept_loop(ListenSock) ->
 	spawn(?MODULE,socket_process_start,[ClientSocket]),
 	accept_loop(ListenSock).
 
-
-
 % Le pide a pid_worker_list un Worker (IP y Puerto del Worker) para conectarse.
 % Se conecta a dicho Worker y se comporta según socket_process_loop
 socket_process_start(ClientSocket) ->
-    pid_workers_list ! {one_worker_request,self()},
-    receive {_,WorkerPort,WorkerIP} -> ok end,
+    {_,WorkerPort,WorkerIP} = lists:nth( random:uniform(length(?WORKER_LIST)) , ?WORKER_LIST ),
     {ok, WorkerSocket} = gen_tcp:connect(WorkerIP,WorkerPort,[list, {active,false}]),
     socket_process_loop(ClientSocket,WorkerSocket).
 
@@ -48,7 +37,7 @@ socket_process_loop(ClientSocket,WorkerSocket) ->
 	%io:format("Waitting for data"), %DEBUG
 	Data = sockaux:gets(ClientSocket),
 	%io:format("Data: ~p~n",[Data]), %DEBUG
-	if (Data == error) -> ok;
+	if (Data == error) -> gen_tcp:close(ClientSocket), gen_tcp:close(WorkerSocket);
 	true ->
 		Parsed_Data = parser:parse(Data),
 		case protocol_validation(Parsed_Data) of
@@ -61,7 +50,7 @@ socket_process_loop(ClientSocket,WorkerSocket) ->
 					gen_tcp:send(ClientSocket,WorkerAnswer ++ "\0"),
 					socket_process_loop(ClientSocket,WorkerSocket);
 			error   ->  gen_tcp:send(ClientSocket,"Invalid command\n"),
-					socket_process_loop(ClientSocket,WorkerSocket);
+					    socket_process_loop(ClientSocket,WorkerSocket);
 			exit_signal ->  gen_tcp:send(ClientSocket,"OK\0"),
 							gen_tcp:send(WorkerSocket,"BYE"),
 							gen_tcp:close(ClientSocket), gen_tcp:close(WorkerSocket)
