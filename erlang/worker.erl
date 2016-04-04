@@ -133,17 +133,35 @@ proc (workerOpenRead, Task)->
     case localfiles:workerOpenRead(Name) of
          NoFile  -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
          Writing -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado());
-         _       -> Gfd = task:fdGlobal(Task), % esto no viene en le Task mariano
+         _       -> Gfd = OpenRead(Name,Idg),
+                    C   = globalIdToClient(IdG),
+                    W   = globalIdToWorker(IdG),
+                    openerfiles:registerOpen(Gfd, C)
+                    Orden = task:crear_workerOpenSucc(Gfd, C),
+                    comunic:enviarWorker(W,Orden)
+    ok;
+
+%OpenRead(name : String, idg : IdGlobal) {
+%	Fd = newFd() /* provee un nuevo fd unico en el worker */
+%	Handle = AbrirLinux(name, modolecutra)
+%	Agregar (Fd , Handle) a FdToHandle (tabla global)
+%	Agregar (Fd , idg) a FdToOwner (tabla global)
+%        Agregar (Fd, name) a FdToName
+%        setStatus(name, Reading)
+
+proc (workerOpenRead, Task)->
+    Name = task:fileName(Task),
+    IdG  = task:idGlobal(Task),
+    case localfiles:workerOpenRead(Name) of
+         NoFile  -> comunic:responderClienteRemoto(Idg, mensaje:archivoNoExiste());
+         Writing -> comunic:responderClienteRemoto(Idg, mensaje:archivoOcupado());
+         _       -> Gfd = OpenRead(Name,Idg),
                     C   = globalIdToClient(IdG),
                     W   = globalIdToWorker(IdG),
                     openerfiles:registerOpen(Gfd, C)
                     Orden = task:crear_workerOpenSucc(Gfd, C),
                     comunic:enviarWorker(W,Orden)
     ok.
-
-
-
-
 
 
 
