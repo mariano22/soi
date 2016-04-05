@@ -1,4 +1,4 @@
--module(worker).
+-module(proctask).
 -compile(export_all).
 
 
@@ -11,7 +11,7 @@ loop() ->
     
 
 % OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, userWrite, userRead, userClose, userBye
-% OrdenWorkerName == workerDelete, workerOpenRead, wWrite, wRead, workerOpenWrite, workerSay, opsucc, workerClose, workerCloseSucc
+% OrdenWorkerName == workerDelete, workerOpenRead, workerWrite, workerRead, workerOpenWrite, workerSay, workerOpenSucc, workerClose, workerCloseBye, workerCloseSucc, workerToken
 
 %getOwner( s: String ) = noowner | WorkerId
 %myFiles (file: String) = s : NoFile | Unused | Reading | Writing
@@ -34,8 +34,8 @@ proc( userCreate , Task ) ->
     Name = task:fileName(Task),
     C  = task:cliente(Task),
     case globalfiles:getOwner(Name) of
-         noOwner -> tokenQueues:newCreate(Name,C);
-         _       -> responderClienteRemoto(C, mensaje:archivoYaExistente())
+         noOwner -> tokenqueues:newCreate(Name,C);
+         _       -> responderClienteRemoto(C, mensaje:archivoExistente())
     end,
     ok;
 
@@ -68,7 +68,7 @@ proc (workerOpenWrite, Task)->
     IdG  = task:idGlobal(Task),
     case localfiles:status(Name) of
          noFile  -> responderClienteRemoto(IdG, mensaje:archivoNoExiste());
-         unused  -> Handle  = realfs:openr(Name),% openr dado un Name te devuelve un handle
+         unused  -> Handle  = realfs:openw(Name),% openr dado un Name te devuelve un handle
                     LocalFd = fdmanage:registerFd(IdG,Handle),
                     localfiles:openW(Name),
                     Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
@@ -104,7 +104,7 @@ proc (workerOpenRead, Task)->
     case localfiles:status(Name) of
          noFile  -> responderClienteRemoto(IdG, mensaje:archivoNoExiste());
          writing -> responderClienteRemoto(IdG, mensaje:archivoOcupado());
-         _       -> Handle  = realfs:openr(Name),% openr dado un Name te devuelve un handle
+         _       -> Handle  = realfs:openr(Name),
                     LocalFd = fdmanage:registerFd(IdG,Handle),
                     localfiles:openR(Name),
                     Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
@@ -147,7 +147,7 @@ proc(userWrite, Task)->
     C   = task:cliente(Task),
     IdG = ids:makeIdGlobal(ids:myId(),C),
     W   = ids:globalFdToWorker(Gfd),
-    Orden = task:crear_workerWorkerWrite(Gfd, IdG),
+    Orden = task:crear_workerWrite(Gfd, IdG),
     responderClienteRemoto(W,Orden),
     ok;
 
@@ -174,11 +174,9 @@ proc(userRead, Task)->
     Sz  = task:sizeTxt(Task),
     IdG = ids:makeIdGlobal(ids:myId(),C),
     W   = ids:globalFdToWorker(Gfd),
-    Orden = task:crear_workerWorkerRead(Sz, Gfd, IdG),
+    Orden = task:crear_workerRead(Sz, Gfd, IdG),
     responderClienteRemoto(W,Orden),
     ok;
-
-
 
 proc(workerRead, Task)->
     Gfd = task:fdGlobal(Task),
@@ -254,7 +252,7 @@ proc( workerDelete , Task ) ->
     Idg  = task:idGlobal(Task),
     case localfiles:status(Name) of
          noFile -> responderClienteRemoto(Idg, mensaje:archivoNoExiste());
-         unused -> tokenQueues:newDelete(Name),
+         unused -> tokenqueues:newDelete(Name),
                    responderClienteRemoto(Idg, mensaje:archivoBorrado()),
                    localfiles:delete(Name);
          _      -> responderClienteRemoto(Idg, mensaje:archivoOcupado())
@@ -290,6 +288,38 @@ proc( workerCloseBye, Task ) ->
 
 %---------------------------------------------------------------------------------------------------------------
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%Token
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% newCreate : String, ClientId -> ok (agrega a la lista de candidatos a crearse, el cliente es para saber a quien responder)
+% newDelete : String -> ok (agrega a la lista de bajas a informarse)
+% getCreates : () -> [{String,WiD}] (extrae la lista de creaciones candidatas)
+% getDeletes : () -> [String] (extrae la lista de bajas a informarse)
+
+% tickTime : () -> Int (devuelve el tiempo que tarda el token en ser procesado)
+% recvT : Token -> ok (notifica al modulo que se recibio el Token y lo almacena)
+% getT : () -> Token (devuelve el Token almacenado)
+% mustProc() : () -> true | false (indica si se debe procesar o no el Token)
+      %  ListaBajas = getListaBajasToken();
+     %   ListaAltas = getListaAltasToken();
+    %    Filtrar los que tienen WorkerId == myid() (ambas listas)
+   %     Los de la cola de delete ponerlos en ListaBajas
+  %      Los de mi cola de create que estene en ListaAltras contestar que no se puede
+ %       Los de mi cola de create que NO estene en ListaAltras contestar que se pudo crear (antes modificar estado mi BD local)  y Agregar a lista de altas
+%
+ %       Modificar estado global con las listas Alta/Baja
+%        pasar el token
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+proc(workerToken, Task) ->
+    Token = task:token(Task),
+    task:recvT(Token),
+    ok;
+
+%---------------------------------------------------------------------------------------------------------------
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%Say
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -307,4 +337,9 @@ responderClienteRemoto( Idg, Msj) ->
     comunic:enviarWorker(W, T).
 
 %---------------------------------------------------------------------------------------------------------------
+
+    
+
+
+
 

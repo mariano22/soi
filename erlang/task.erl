@@ -14,17 +14,28 @@ cliente({_, L})  -> element(2,lists:keyfind(cliente,1,L)).
 sizeTxt({_, L})  -> element(2,lists:keyfind(sizeTxt,1,L)).
 strTxt({_, L})   -> element(2,lists:keyfind(strTxt,1,L)).
 mensaje({_, L})  -> element(2,lists:keyfind(mensaje,1,L)).
+token({_, L})  -> element(2,lists:keyfind(token,1,L)).
 
-crear_workerDelete(Name, Idg)-> { workerDelete, [{fileName,Name},{idGlobal,Idg}] }.
+crear_workerDelete(Name, IdG)      -> { workerDelete, [{fileName,Name},{idGlobal,IdG}] }.
 
-crear_workerOpenRead(Name, Idg)-> { workerOpenRead, [{fileName,Name},{idGlobal,Idg}] }.
+crear_workerOpenRead(Name, IdG)    -> { workerOpenRead, [{fileName,Name},{idGlobal,IdG}] }.
 
-crear_workerOpenWrite(Name, Idg) -> { workerOpenWrite, [{fileName,Name},{idGlobal,Idg}] }.
+crear_workerOpenWrite(Name, IdG)   -> { workerOpenWrite, [{fileName,Name},{idGlobal,IdG}] }.
 
-crear_workerClose(Gfd, Idg) -> { workerClose, [{idGlobal,Idg},{fdGlobal,Gfd}] }.
+crear_workerOpenSucc(Gfd, C)       -> { workerOpenSucc, [{fdGlobal,Gfd},{cliente,C}]}.
 
-crear_workerCloseSucc(W, C) ->  { workerCloseSucc, [] }.
+crear_workerWrite(Gfd, IdG)        -> { workerWrite, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
 
+crear_workerRead(Sz, Gfd, IdG)     -> { workerRead, [{sizeTxt,Sz},{idGlobal,IdG},{fdGlobal,Gfd}] }.
+
+crear_workerClose(Gfd, IdG)        -> { workerClose, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
+
+crear_workerCloseSucc(Gfd, IdG)        -> { workerCloseSucc, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
+
+crear_workerCloseBye(Gfd)          -> { workerCloseBye, [{fdGlobal,Gfd}] }.
+
+crear_workerSay(C, Msj )           -> { workerSay, [{cliente,C},{mensaje,Msj}] }.
+crear_workerToken(Token)           -> { workerToken, [{token,Token}] }.
 
 toData(X) -> term_to_binary(X).
 fromData(X) -> binary_to_term(X).

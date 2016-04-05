@@ -7,6 +7,9 @@
 % recvT : Token -> ok (notifica al modulo que se recibio el Token y lo almacena)
 % getT : () -> Token (devuelve el Token almacenado)
 % mustProc() : () -> true | false (indica si se debe procesar o no el Token)
+% makeToken : [ {NameFile, ClientId} ],  [ NameFile ] -> Token
+% getListaAltas : Token -> [ {NameFile, ClientId} ]
+% getListaBajas : Token -> [ NameFile ]
 
 loop( T, F ) ->
     receive
@@ -28,3 +31,7 @@ getT() -> tokencontrolserver ! {self(), getT },
                        receive X -> X end.
 mustProc()-> tokencontrolserver ! {self(), mustProc }, 
                        receive X -> X end.
+
+makeToken(LA,LB) -> {LA,LB}.
+getListaAltas({LA,_}) -> LA.
+getListaBajas({_,LB}) -> LB.

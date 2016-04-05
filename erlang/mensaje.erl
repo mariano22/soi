@@ -8,7 +8,7 @@ say(M) -> lists:concat(M).
 
 archivoNoExiste()    -> addArg("notExist",mErr()).
 archivoOcupado()     -> addArg("Ocuppied",mErr()).
-archivoYaExistente() -> addArg("Exist",mErr()).
+archivaExistente()   -> addArg("Exist",mErr()).
 permisoDenegado()    -> addArg("AccessDenied",mErr()).
 
 archivoCreado()      -> addArg("Create",mOk()).
