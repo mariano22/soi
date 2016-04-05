@@ -7,11 +7,13 @@
 % recvT : Token -> ok (notifica al modulo que se recibio el Token y lo almacena)
 % getT : () -> Token (devuelve el Token almacenado)
 % mustProc() : () -> true | false (indica si se debe procesar o no el Token)
-% makeToken : [ {NameFile, ClientId} ],  [ NameFile ] -> Token
-% getListaAltas : Token -> [ {NameFile, ClientId} ]
-% getListaBajas : Token -> [ NameFile ]
+% makeToken : [ {NameFile, WorkerId} ],  [ {NameFile,WorkerId} ] -> Token
+% getListaAltas : Token -> [ {NameFile,WorkerId} ]
+% getListaBajas : Token -> [ {NameFile,WorkerId} ]
 
 loop( T, F ) ->
+% DEBUG
+%    io:format("tokencontrol: ~p ~p~n",[T,F]), 
     receive
         { P, getT }  ->  P ! T,
                            loop( nothing , false ) ;

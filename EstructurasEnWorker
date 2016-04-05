@@ -3,7 +3,7 @@ Aca un resumen de las estructuras que conforman el estado global de cada worker 
 globalfile: ( NameFiler -> WorkerId )
 guarda la imagen del sistema global que tiene el worker
 
-localfile: ( NameFile -> reading | writting | unused )
+localfiles: ( NameFile -> reading | writting | unused )
 guarda el estado de los archivos locales (los que el worker es dueño)
 
 fdmanage: ( LocalFd -> Handle, GlobalId )
@@ -11,3 +11,15 @@ lleva la cuenta de los LocalFd respectivos a los archivos locales abiertos, quie
 
 openedfiles: ( ClientId -> GlobalFd )
 lleva la cuenta de los archivos abiertos por los clientes locales en workers remotos
+
+localconections: ( ClientId -> Pid )
+almacena el Pid del proceso que se encarga de la comunicacion con el cliente
+
+realfs: (Archivos Reales)
+cuidar que los archivos reales se actualicen bien
+
+tokencontrol: (Token)
+almacena el token
+
+tokenqueues: [{String,CID}] Lista de Altas requeridas, [String] Lista de Deletes a informar
+

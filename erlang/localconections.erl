@@ -9,7 +9,7 @@
 % DEBUG
 
 loop( L ) ->
-    io:format("~p~n~n",[L]),
+    io:format("localconections: ~p~n",[L]),
     receive
         {P,  newC, Cid,Pid }  ->   Lp = [{Cid,Pid}|L],
                                    P ! ok,

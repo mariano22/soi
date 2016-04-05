@@ -9,13 +9,15 @@
 -module(dispatcher).
 -compile(export_all).
 -define(DISPATCHER_LISTEN_PORT,8000).
--include("worker_list.hrl").
 
 % Lee la lista de Workers.
 % Spawnea el proceso encargado de designar a los Workers.
 % Abre la conexión e inicia el loop para aceptar conexiones entrantes
-setUp() ->
-	{ok,ListenSock} = gen_tcp:listen(?DISPATCHER_LISTEN_PORT, [list, {active,false}]),
+
+init() -> setUp(?DISPATCHER_LISTEN_PORT).
+
+setUp(ListenPort) ->
+	{ok,ListenSock} = gen_tcp:listen(ListenPort, [list, {active,false}]),
 	spawn(?MODULE,accept_loop,[ListenSock]),
     ok.
 
@@ -28,7 +30,10 @@ accept_loop(ListenSock) ->
 % Le pide a pid_worker_list un Worker (IP y Puerto del Worker) para conectarse.
 % Se conecta a dicho Worker y se comporta según socket_process_loop
 socket_process_start(ClientSocket) ->
-    {_,WorkerPort,WorkerIP} = lists:nth( random:uniform(length(?WORKER_LIST)) , ?WORKER_LIST ),
+%    WId = random:uniform( workerdirs:wlen() ), MODIFICAR
+    WId = 0,
+    WorkerPort = workerdirs:externPort(WId),
+    WorkerIP = workerdirs:ip(WId),
     {ok, WorkerSocket} = gen_tcp:connect(WorkerIP,WorkerPort,[list, {active,false}]),
     socket_process_loop(ClientSocket,WorkerSocket).
 

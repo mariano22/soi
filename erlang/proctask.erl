@@ -2,14 +2,6 @@
 -compile(export_all).
 
 
-loop() -> 
-    receive
-        Task      -> proc(task:name(Task),Task)
-        after 500 -> ok
-    end,
-    loop().
-    
-
 % OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, userWrite, userRead, userClose, userBye
 % OrdenWorkerName == workerDelete, workerOpenRead, workerWrite, workerRead, workerOpenWrite, workerSay, workerOpenSucc, workerClose, workerCloseBye, workerCloseSucc, workerToken
 
@@ -20,8 +12,8 @@ loop() ->
 %%LSD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 proc( userLsd , Task ) ->
-    mensaje = lists:foldl( fun(C,L) ->mensaje:addArg(C,L) end, mensaje:mOk(),  globalfiles:archivosActuales() ),
-    comunic:responderCliente( task:cliente(Task), mensaje ),
+    Mensaje = lists:foldl( fun(C,L) ->mensaje:addArg(C,L) end, mensaje:mOk(),  globalfiles:archivosActuales() ),
+    comunic:responderCliente( task:cliente(Task), Mensaje ),
     ok;
 
 %---------------------------------------------------------------------------------------------------------------
@@ -54,10 +46,9 @@ proc( userCreate , Task ) ->
 
 proc( userOpenWrite, Task)->
     Name = task:fileName(Task),
-    Idg  = task:idGlobal(Task),
     C    = task:cliente(Task),
     case globalfiles:getOwner(Name) of
-         noOwner -> responderClienteRemoto(Idg, mensaje:archivoNoExiste());
+         noOwner -> comunic:responderCliente(C, mensaje:archivoNoExiste());
          W       -> Orden = task:crear_workerOpenWrite(Name, ids:makeIdGlobal(ids:myId(),C)),
                     comunic:enviarWorker(W,Orden)
     end,
@@ -88,10 +79,9 @@ proc (workerOpenWrite, Task)->
 
 proc( userOpenRead, Task)->
     Name = task:fileName(Task),
-    Idg  = task:idGlobal(Task),
     C    = task:cliente(Task),
     case globalfiles:getOwner(Name) of
-         noOwner -> responderClienteRemoto(Idg, mensaje:archivoNoExiste());
+         noOwner -> comunic:responderCliente(C, mensaje:archivoNoExiste());
          W       -> Orden = task:crear_workerOpenRead(Name, ids:makeIdGlobal(ids:myId(),C)),
                     comunic:enviarWorker(W,Orden)
     end,
@@ -121,12 +111,11 @@ proc (workerOpenRead, Task)->
 
 
 proc(workerOpenSucc, Task)->
-    Gfd = ids:fdGlobal(Task),
-    C   = ids:cliente(Task),
+    Gfd = task:fdGlobal(Task),
+    C   = task:cliente(Task),
     openedfiles:registerOpen(Gfd,C),
     W   = ids:globalFdToWorker(Gfd),
-    IdG = ids:makeIdGlobal(W,C),
-    responderClienteRemoto(IdG, mensaje:archivoOcupado()),
+    responderCliente(C, mensaje:archivoAbierdo(Gfd)),
     ok;
 
 
@@ -148,7 +137,7 @@ proc(userWrite, Task)->
     IdG = ids:makeIdGlobal(ids:myId(),C),
     W   = ids:globalFdToWorker(Gfd),
     Orden = task:crear_workerWrite(Gfd, IdG),
-    responderClienteRemoto(W,Orden),
+    comunic:enviarWorker(W,Orden),
     ok;
 
 proc(workerWrite, Task)->
@@ -175,7 +164,7 @@ proc(userRead, Task)->
     IdG = ids:makeIdGlobal(ids:myId(),C),
     W   = ids:globalFdToWorker(Gfd),
     Orden = task:crear_workerRead(Sz, Gfd, IdG),
-    responderClienteRemoto(W,Orden),
+    comunic:enviarWorker(W,Orden),
     ok;
 
 proc(workerRead, Task)->
@@ -240,7 +229,7 @@ proc( userDelete , Task ) ->
     Name = task:fileName(Task),
     C = task:cliente(Task),
     case globalfiles:getOwner(name) of
-         noOwner -> comunic:responderCliente( c , mensaje:archivoNoExiste() ) ;
+         noOwner -> comunic:responderCliente( C , mensaje:archivoNoExiste() ) ;
          W       -> Orden = task:crear_workerDelete(Name, ids:makeIdGlobal(ids:myId(),C)),
                     comunic:enviarWorker(W,Orden)
     end,
@@ -254,7 +243,8 @@ proc( workerDelete , Task ) ->
          noFile -> responderClienteRemoto(Idg, mensaje:archivoNoExiste());
          unused -> tokenqueues:newDelete(Name),
                    responderClienteRemoto(Idg, mensaje:archivoBorrado()),
-                   localfiles:delete(Name);
+                   localfiles:delete(Name),
+                   realfs:delete(Name);
          _      -> responderClienteRemoto(Idg, mensaje:archivoOcupado())
     end,
     ok;
@@ -267,7 +257,7 @@ proc( workerDelete , Task ) ->
 
 proc ( userBye, Task )->
     C        = task:cliente(Task),
-    GlobalFD = openedfile:globalFdList(C),
+    GlobalFD = openedfiles:globalFdList(C),
     Fun = fun(Gfd) -> 
              Orden = task:crear_workerCloseBye(Gfd),
              W     = ids:globalFdToWorker(Gfd),
@@ -293,29 +283,10 @@ proc( workerCloseBye, Task ) ->
 %%Token
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% newCreate : String, ClientId -> ok (agrega a la lista de candidatos a crearse, el cliente es para saber a quien responder)
-% newDelete : String -> ok (agrega a la lista de bajas a informarse)
-% getCreates : () -> [{String,WiD}] (extrae la lista de creaciones candidatas)
-% getDeletes : () -> [String] (extrae la lista de bajas a informarse)
-
-% tickTime : () -> Int (devuelve el tiempo que tarda el token en ser procesado)
-% recvT : Token -> ok (notifica al modulo que se recibio el Token y lo almacena)
-% getT : () -> Token (devuelve el Token almacenado)
-% mustProc() : () -> true | false (indica si se debe procesar o no el Token)
-      %  ListaBajas = getListaBajasToken();
-     %   ListaAltas = getListaAltasToken();
-    %    Filtrar los que tienen WorkerId == myid() (ambas listas)
-   %     Los de la cola de delete ponerlos en ListaBajas
-  %      Los de mi cola de create que estene en ListaAltras contestar que no se puede
- %       Los de mi cola de create que NO estene en ListaAltras contestar que se pudo crear (antes modificar estado mi BD local)  y Agregar a lista de altas
-%
- %       Modificar estado global con las listas Alta/Baja
-%        pasar el token
-
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 proc(workerToken, Task) ->
     Token = task:token(Task),
-    task:recvT(Token),
+    tokencontrol:recvT(Token),
     ok;
 
 %---------------------------------------------------------------------------------------------------------------

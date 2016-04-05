@@ -10,6 +10,7 @@
 
 
 loop( LC, LD ) ->
+    io:format("tokenqueues: ~p ~p~n",[LC,LD]),
     receive
         {P, getCreates}  ->  P ! LC,
                                   loop( [], LD ) ;

@@ -6,7 +6,6 @@
 -compile(export_all).
 -import(parser,[parse/1]).
 -import(sockaux,[sockaux_gets/1]).
--include("worker_list.hrl").
 
 test(ID) ->
     localconections:setUp(),
@@ -21,6 +20,7 @@ testloop() ->
 
 % Comienza a escuchar en el puerto que le corresponda al worker.
 setUp(InternPort,ExternPort) ->
+        io:format("Puertos ~p  ~p~n~n",[InternPort,ExternPort]),
 		{ok,ExternListenSock} = gen_tcp:listen(ExternPort, [list, {active,false}]),
 		{ok,InternListenSock} = gen_tcp:listen(InternPort, [binary,{packet,4}, {active,false}]),
 		spawn(?MODULE,externInbox,[ExternListenSock,0]),
@@ -33,6 +33,7 @@ externInbox(ListenSock,IdCon) ->
     {ok,Socket} = gen_tcp:accept(ListenSock),
 	PS = spawn(?MODULE,externInboxSlave,[Socket,IdCon]),
     localconections:newC(IdCon,PS),
+    receive after 1000-> ok end,
 	externInbox(ListenSock,IdCon+1).
 
 internInbox(ListenSock) ->
@@ -75,7 +76,7 @@ responderCliente(Cid, M) ->
 test2(P) -> enviarTask('127.0.0.1',P,{asd}).
 
 enviarTask(WorkerIP,WorkerPort,Task) ->
-    %DEBUGio:format("~p~p~n",[WorkerIP,WorkerPort]),
+    io:format("Enviando a Worker: ~p~p~n",[WorkerIP,WorkerPort]), %DEBUG
 	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerPort,[binary,{packet,4}, {active,false}]),
     SendData = task:toData(Task),
     %DEBUG io:format("~p~n",[SendData]),
@@ -85,7 +86,8 @@ enviarTask(WorkerIP,WorkerPort,Task) ->
 
 % Se encarga de mandar un mensaje a un Worker determinado
 enviarWorker( WId , Task ) -> 
-    {_,WPort,WIP} = lists:keyfind(WId,1,?WORKER_LIST),
+    WIP = workerdirs:ip(WId),
+    WPort = workerdirs:internPort(WId),
     enviarTask(WIP,WPort,Task).
 
 

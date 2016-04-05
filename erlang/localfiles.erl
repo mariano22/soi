@@ -15,7 +15,7 @@ dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),",",elem
               dbg(L).
 
 loop( L ) ->
-    %dbg(L),
+        io:format("localfiles: ~p~n",[L]),
     receive
         {P, status, NameFile} -> case lists:keyfind(NameFile,1,L) of
                                       false -> P ! noFile ;

@@ -16,4 +16,4 @@ archivoBorrado()     -> addArg("Deleted",mOk()).
 archivoCerrado()     -> addArg("Close",mOk()).
 archivoWriteSucc()   -> addArg("Writed",mOk()).
 archivoReadSucc(Txt) -> addArg(Txt,mOk()).
-
+archivoAbierdo(Gfd)  -> addArg(integer_to_list(Gfd),mOk()).

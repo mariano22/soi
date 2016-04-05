@@ -5,7 +5,7 @@
 % archivosActuales () -> [String] (Lista los archivos que actualmente es la base de datos global del worker)
 % getOwner : String -> noOwner | WorkerId (Dado un archivo, si existe devuelve su dueño)
 % baja : String -> ok (Da de baja un archivo en la tabla)
-% alta : String -> ok (Da de alta un archivo en la tabla, asignandole un dueño)
+% alta : String, WorkerId -> ok (Da de alta un archivo en la tabla, asignandole un dueño)
 
 % DEBUG
 dbg([]) -> io:format("~n~n");
@@ -13,7 +13,7 @@ dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),"} "])),
               dbg(L).
 
 loop( L ) ->
-    %dbg(L),
+    io:format("globalfiles: ~p~n",[L]),
     receive
         {P, archivosActuales}  -> { Archivos , _ } = lists:unzip( L ),
                                   P ! Archivos ,

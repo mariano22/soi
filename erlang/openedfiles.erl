@@ -14,7 +14,7 @@ dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),"} "])),
               dbg(L).
 
 loop( L ) ->
-    %dbg(L),
+    io:format("openedfiles: ~p~n",[L]),
     receive
         {P, globalFdList , ClientId }    -> Rp = lists:filter(fun(X) -> element(2,X)==ClientId end,L),
                                             R = lists:map(fun(X) -> element(1,X) end,Rp),

@@ -41,6 +41,7 @@ toData(X) -> term_to_binary(X).
 fromData(X) -> binary_to_term(X).
 % OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
 fromUserData(List,IdCon) ->
+    io:format("~p~p~n",[List,IdCon]),
     case List of
         ["CON"] -> { userCon, [{cliente,IdCon}] };
         ["LSD"] -> { userLsd, [{cliente,IdCon}] };

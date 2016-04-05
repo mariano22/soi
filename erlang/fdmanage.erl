@@ -13,7 +13,7 @@ dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),",",elem
               dbg(L).
 
 loop( L , FdC) ->
-    dbg(L),
+    io:format("fdmanage: ~p~n",[L]),
     receive
         {P, getHandle, Fd} -> case lists:keyfind(Fd,1,L) of
                                       false -> P ! noFd ;
