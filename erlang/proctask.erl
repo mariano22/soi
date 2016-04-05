@@ -59,8 +59,8 @@ proc (workerOpenWrite, Task)->
     IdG  = task:idGlobal(Task),
     case localfiles:status(Name) of
          noFile  -> responderClienteRemoto(IdG, mensaje:archivoNoExiste());
-         unused  -> Handle  = realfs:openw(Name),% openr dado un Name te devuelve un handle
-                    LocalFd = fdmanage:registerFd(IdG,Handle),
+         unused  -> Handle  = realfs:openw(Name),
+                    LocalFd = fdmanage:registerFd(IdG,Handle,Name),
                     localfiles:openW(Name),
                     Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
                     C   = ids:globalIdToClient(IdG),
@@ -95,7 +95,7 @@ proc (workerOpenRead, Task)->
          noFile  -> responderClienteRemoto(IdG, mensaje:archivoNoExiste());
          writing -> responderClienteRemoto(IdG, mensaje:archivoOcupado());
          _       -> Handle  = realfs:openr(Name),
-                    LocalFd = fdmanage:registerFd(IdG,Handle),
+                    LocalFd = fdmanage:registerFd(IdG,Handle,Name),
                     localfiles:openR(Name),
                     Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
                     C   = ids:globalIdToClient(IdG),
@@ -114,8 +114,7 @@ proc(workerOpenSucc, Task)->
     Gfd = task:fdGlobal(Task),
     C   = task:cliente(Task),
     openedfiles:registerOpen(Gfd,C),
-    W   = ids:globalFdToWorker(Gfd),
-    responderCliente(C, mensaje:archivoAbierdo(Gfd)),
+    comunic:responderCliente(C, mensaje:archivoAbierto(Gfd)),
     ok;
 
 
@@ -135,8 +134,10 @@ proc(userWrite, Task)->
     Gfd = task:fdGlobal(Task),
     C   = task:cliente(Task),
     IdG = ids:makeIdGlobal(ids:myId(),C),
+    Sz  = task:sizeTxt(Task),
+    Txt = lists:sublist(task:strTxt(Task), Sz),
     W   = ids:globalFdToWorker(Gfd),
-    Orden = task:crear_workerWrite(Gfd, IdG),
+    Orden = task:crear_workerWrite(Txt,Gfd, IdG),
     comunic:enviarWorker(W,Orden),
     ok;
 
@@ -200,8 +201,9 @@ proc( workerClose, Task ) ->
     Fd  = ids:globalFdToLocalFd(Gfd),
     case fdmanage:getOwner(Fd)==Idg of
          false -> responderClienteRemoto(Idg, mensaje:permisoDenegado());
-         true  -> fdManage:unregisterFd(Fd),
-                  F     = task:fileName(Task),
+         true  -> F     = fdmanage:getNameFile(Fd),
+                  fdmanage:unregisterFd(Fd),
+                  io:format("dbg: ~p ~p~n",[Fd,F]), % DEBUG
                   localfiles:close(F),
                   Orden = task:crear_workerCloseSucc(Gfd, Idg),
                   W     = ids:globalIdToWorker(Idg),
@@ -270,8 +272,8 @@ proc ( userBye, Task )->
 proc( workerCloseBye, Task ) ->
     Gfd = task:fdGlobal(Task),
     Fd  = ids:globalFdToLocalFd(Gfd),
+    F   = fdmanage:getNameFile(Fd),
     fdManage:unregisterFd(Fd),
-    F     = task:fileName(Task),
     localfiles:close(F),
     openedfiles:registerClose(Gfd),
     ok;

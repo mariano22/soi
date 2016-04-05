@@ -1,3 +1,8 @@
+control de eof en read
+hacer bien el bye
+hacer el con
+espacios entre los mensajes
+
 cliente se desconecta abruptamente
 cliente envia Fd malicioso
-
+cliente no espera respuesta

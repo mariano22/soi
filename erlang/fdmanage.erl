@@ -4,8 +4,9 @@
 % Funciones:
 % getHandle : LocalFd -> Handle (Dado un Fd devuelve el Handle del sistema de archivos real)
 % getOwner  : LocalFd -> GlobalId (Dado un Fd devuelve el usuario que lo posee)
+% getNameFile  : LocalFd -> String (Dado un Fd devuelve el nombre del archivo que es)
 % unregisterFd : LocalFd -> ok (Borra un Fd de la tabla)
-% registerFd : Globalid, Handle -> LocalFd (Registra un nuevo Fd la tabla y devuelve le Fd asignado)
+% registerFd : Globalid, Handle,NameFile -> LocalFd (Registra un nuevo Fd la tabla y devuelve le Fd asignado)
 
 % DEBUG
 dbg([]) -> io:format("~n~n");
@@ -25,10 +26,15 @@ loop( L , FdC) ->
                                       T ->  P ! element(2,T)
                                   end,
                                   loop( L, FdC ) ;
+        {P, getNameFile, Fd} -> case lists:keyfind(Fd,1,L) of
+                                      false -> P ! noFd ;
+                                      T ->  P ! element(4,T)
+                                  end,
+                                  loop( L, FdC ) ;
         {P, unregisterFd, Fd} -> Lp = lists:keydelete(Fd,1,L),
                                    P ! ok,
                                    loop( Lp , FdC) ;
-        {P, registerFd, GId, Handle }   -> Lp = [{FdC,GId,Handle}|L],
+        {P, registerFd, GId, Handle, NameFile }   -> Lp = [{FdC,GId,Handle,NameFile}|L],
                                    P ! FdC,
                                    loop( Lp, FdC+1 ) ;
         _ -> error("esto no deberia suceder 666") 
@@ -38,9 +44,11 @@ setUp() -> register( fdmanageserver, spawn(?MODULE,loop,[[],0]) ).
 
 getHandle( Fd ) -> fdmanageserver ! {self(), getHandle , Fd }, 
                   receive X -> X end.
+getNameFile( Fd ) -> fdmanageserver ! {self(), getNameFile , Fd }, 
+                  receive X -> X end.
 getOwner( Fd ) -> fdmanageserver ! {self(), getOwner , Fd }, 
                   receive X -> X end.
 unregisterFd( Fd ) -> fdmanageserver ! {self(), unregisterFd , Fd }, 
                   receive X -> X end.
-registerFd( GId, Handle ) -> fdmanageserver ! {self(), registerFd ,GId, Handle }, 
+registerFd( GId, Handle, NameFile ) -> fdmanageserver ! {self(), registerFd ,GId, Handle, NameFile }, 
                   receive X -> X end.

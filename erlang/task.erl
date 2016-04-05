@@ -24,13 +24,13 @@ crear_workerOpenWrite(Name, IdG)   -> { workerOpenWrite, [{fileName,Name},{idGlo
 
 crear_workerOpenSucc(Gfd, C)       -> { workerOpenSucc, [{fdGlobal,Gfd},{cliente,C}]}.
 
-crear_workerWrite(Gfd, IdG)        -> { workerWrite, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
+crear_workerWrite(Txt,Gfd, IdG)    -> { workerWrite, [{strTxt,Txt},{idGlobal,IdG},{fdGlobal,Gfd}] }.
 
 crear_workerRead(Sz, Gfd, IdG)     -> { workerRead, [{sizeTxt,Sz},{idGlobal,IdG},{fdGlobal,Gfd}] }.
 
 crear_workerClose(Gfd, IdG)        -> { workerClose, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
 
-crear_workerCloseSucc(Gfd, IdG)        -> { workerCloseSucc, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
+crear_workerCloseSucc(Gfd, IdG)    -> { workerCloseSucc, [{idGlobal,IdG},{fdGlobal,Gfd}] }.
 
 crear_workerCloseBye(Gfd)          -> { workerCloseBye, [{fdGlobal,Gfd}] }.
 
@@ -50,7 +50,7 @@ fromUserData(List,IdCon) ->
         ["OPNR", NameFile] -> {userOpenRead, [{cliente,IdCon}, {fileName,NameFile}]};
         ["OPNW", NameFile] -> {userOpenWrite, [{cliente,IdCon}, {fileName,NameFile}]};
         ["WRT", "FD", GFd, "SIZE", Size, Text] -> {userWrite, [{cliente,IdCon}, {fdGlobal,list_to_integer(GFd)}, {sizeTxt,list_to_integer(Size)}, {strTxt,Text} ]};
-        ["REA", "FD", GFd, "SIZE", Size] -> {userWrite, [{cliente,IdCon}, {fdGlobal,list_to_integer(GFd)} , {sizeTxt,list_to_integer(Size)} ]};
+        ["REA", "FD", GFd, "SIZE", Size] -> {userRead, [{cliente,IdCon}, {fdGlobal,list_to_integer(GFd)} , {sizeTxt,list_to_integer(Size)} ]};
         ["CLO", "FD", GFd] -> {userClose, [{cliente,IdCon}, {fdGlobal,list_to_integer(GFd)}]};
         ["BYE"] -> {userBye, [{cliente,IdCon}]};
         _       -> error("Esto no debe suceder")

@@ -1,6 +1,6 @@
 -module(realfs).
 -compile(export_all).
--define(WORKER_PATH,"./").
+-define(WORKER_PATH,"./fs/").
 
 % este modulo es el encargado de encapsular la interaccion con el sistema de archivos real subyacente
 % Funciones
