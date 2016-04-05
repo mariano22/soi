@@ -49,6 +49,7 @@ externInboxSlave(Socket,IdCon) ->
     if Data==error -> gen_tcp:close(Socket), localconections:delC(IdCon);
     true -> ParsedData = parser:parse(Data),
              Task = task:fromUserData(ParsedData,IdCon),
+             io:format("TAAAAASK2 ~p~n",[Task]),
              mainWorker ! Task,
              receive X -> ok end,
              gen_tcp:send(Socket,X),
@@ -60,8 +61,10 @@ externInboxSlave(Socket,IdCon) ->
 internInboxSlave(Socket) ->
 	{ok,Data} = gen_tcp:recv(Socket,0), % MODIFICAR!
     if Data==error -> gen_tcp:close(Socket);
-    true ->  %DEBUG io:format("~p~n",[Data]),
+    true ->  %DEBUG
+             io:format("MEGADEBUG ~p~n",[Data]),
              Task = task:fromData(Data),
+             io:format("TAAAAASK1 ~p~n",[Task]),
              mainWorker ! Task,
              gen_tcp:close(Socket)
     end.
@@ -76,7 +79,7 @@ responderCliente(Cid, M) ->
 test2(P) -> enviarTask('127.0.0.1',P,{asd}).
 
 enviarTask(WorkerIP,WorkerPort,Task) ->
-    io:format("Enviando a Worker: ~p~p~n",[WorkerIP,WorkerPort]), %DEBUG
+    io:format("Enviando a Worker: ~p ~p ~p~n",[WorkerIP,WorkerPort,Task]), %DEBUG
 	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerPort,[binary,{packet,4}, {active,false}]),
     SendData = task:toData(Task),
     %DEBUG io:format("~p~n",[SendData]),

@@ -18,7 +18,8 @@ loop( L ) ->
         {P, archivosActuales}  -> { Archivos , _ } = lists:unzip( L ),
                                   P ! Archivos ,
                                   loop( L ) ;
-        {P, getOwner, NameFile} -> case lists:keyfind(NameFile,1,L) of
+        {P, getOwner, NameFile} ->
+                                   case lists:keyfind(NameFile,1,L) of
                                         false -> P ! noOwner ;
                                         WId   -> P ! element(2,WId)
                                    end,

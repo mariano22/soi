@@ -54,7 +54,7 @@ socket_process_loop(ClientSocket,WorkerSocket) ->
 			        %io:format("Succesfully send~n"), %DEBUG
 					WorkerAnswer = sockaux:gets(WorkerSocket),
 					%io:format("Answer! ~p~n", [WorkerAnswer]), %DEBUG
-					gen_tcp:send(ClientSocket,WorkerAnswer ++ "\0"),
+					gen_tcp:send(ClientSocket,WorkerAnswer ++ "\n\0"),
 					socket_process_loop(ClientSocket,WorkerSocket);
 			error   ->  gen_tcp:send(ClientSocket,"Invalid command\n"),
 					    socket_process_loop(ClientSocket,WorkerSocket);

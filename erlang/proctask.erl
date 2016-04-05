@@ -251,7 +251,7 @@ proc( workerCloseSucc, Task )->
 proc( userDelete , Task ) ->
     Name = task:fileName(Task),
     C = task:cliente(Task),
-    case globalfiles:getOwner(name) of
+    case globalfiles:getOwner(Name) of
          noOwner -> comunic:responderCliente( C , mensaje:archivoNoExiste() ) ;
          W       -> Orden = task:crear_workerDelete(Name, ids:makeIdGlobal(ids:myId(),C)),
                     comunic:enviarWorker(W,Orden)
