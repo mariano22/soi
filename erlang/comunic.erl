@@ -69,7 +69,7 @@ internInboxSlave(Socket) ->
 responderCliente(Cid, M) ->
     case localconections:find(Cid) of
         noClient -> error("Cliente no encontrado!");
-        P -> %io:format("Mensaje: ~p~n",[mensaje:say(M)]), DEBUG
+        P -> io:format("Mensaje: ~p~n",[mensaje:say(M)]), %DEBUG
              P ! mensaje:say(M)
     end.
 
