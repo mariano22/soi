@@ -8,7 +8,7 @@
 
 -module(dispatcher).
 -compile(export_all).
--define(DISPATCHER_LISTEN_PORT,8000).
+-define(DISPATCHER_LISTEN_PORT,8080).
 
 % Lee la lista de Workers.
 % Spawnea el proceso encargado de designar a los Workers.
@@ -30,8 +30,9 @@ accept_loop(ListenSock) ->
 % Le pide a pid_worker_list un Worker (IP y Puerto del Worker) para conectarse.
 % Se conecta a dicho Worker y se comporta según socket_process_loop
 socket_process_start(ClientSocket) ->
-%    WId = random:uniform( workerdirs:wlen() ), MODIFICAR
-    WId = 0,
+    WId = random:uniform( workerdirs:wlen() )-1, %MODIFICAR
+    io:format("Conectado a:~p ~p~n",[WId,workerdirs:wlen()]),
+%    WId = 0,
     WorkerPort = workerdirs:externPort(WId),
     WorkerIP = workerdirs:ip(WId),
     {ok, WorkerSocket} = gen_tcp:connect(WorkerIP,WorkerPort,[list, {active,false}]),
