@@ -24,7 +24,7 @@ proc( userLsd , Task ) ->
 
 proc( userCreate , Task ) ->
     Name = task:fileName(Task),
-    C  = task:cliente(Task),
+    C    = task:cliente(Task),
     case globalfiles:getOwner(Name) of
          noOwner -> tokenqueues:newCreate(Name,C);
          _       -> responderClienteRemoto(C, mensaje:archivoExistente())
@@ -62,9 +62,9 @@ proc (workerOpenWrite, Task)->
          unused  -> Handle  = realfs:openw(Name),
                     LocalFd = fdmanage:registerFd(IdG,Handle,Name),
                     localfiles:openW(Name),
-                    Gfd = ids:makeGlobalFd(LocalFd, ids:myId()),
-                    C   = ids:globalIdToClient(IdG),
-                    W   = ids:globalIdToWorker(IdG),
+                    Gfd   = ids:makeGlobalFd(LocalFd, ids:myId()),
+                    C     = ids:globalIdToClient(IdG),
+                    W     = ids:globalIdToWorker(IdG),
                     Orden = task:crear_workerOpenSucc(Gfd, C),
                     comunic:enviarWorker(W,Orden);
          _       -> responderClienteRemoto(IdG, mensaje:archivoOcupado())
@@ -135,7 +135,7 @@ proc(userWrite, Task)->
     C   = task:cliente(Task),
     IdG = ids:makeIdGlobal(ids:myId(),C),
     Sz  = task:sizeTxt(Task),
-    Txt = lists:sublist(task:strTxt(Task), Sz),
+    Txt = lists:sublist(task:strTxt(Task), Sz),%trunca la cadena pasada a la longitud idicada
     W   = ids:globalFdToWorker(Gfd),
     Orden = task:crear_workerWrite(Txt,Gfd, IdG),
     comunic:enviarWorker(W,Orden),
@@ -176,7 +176,7 @@ proc(workerRead, Task)->
          false -> responderClienteRemoto( IdG, mensaje:permisoDenegado());
          true  -> Handle = fdmanage:getHandle(Fd),
                   Sz     = task:sizeTxt(Task),
-                  Txt    = realfs:read(Handle,Sz),
+                  Txt    = realfs:read(Handle,Sz),%controlar que no sea (¿o contenga?) eof
                   responderClienteRemoto( IdG, mensaje:archivoReadSucc(Txt))
     end,
     ok;
