@@ -2,7 +2,7 @@
 -compile(export_all).
 
 % Funciones
-% status : String -> noFile | reading | writting | unused (Dado un archivo, si esta localmente devuelve el estado)
+% status : String -> noFile | reading | writing | unused (Dado un archivo, si esta localmente devuelve el estado)
 % delete : String -> ok (Dado un archivo lo borra de la tabla de los locales)
 % create : String -> ok (Dado un archivo lo crea en la tabla de los locales, inicialmente unused)
 % openR : String -> ok (Suma un lector al archivo)
@@ -20,7 +20,7 @@ loop( L ) ->
         {P, status, NameFile} -> case lists:keyfind(NameFile,1,L) of
                                       false -> P ! { localfilesserverResponse, noFile };
                                       T -> if element(2,T)>0 -> P ! { localfilesserverResponse, reading };
-                                              element(3,T)>0 -> P ! { localfilesserverResponse, writting };
+                                              element(3,T)>0 -> P ! { localfilesserverResponse, writing };
                                               true           -> P ! { localfilesserverResponse, unused}
                                            end
                                   end,
