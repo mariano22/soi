@@ -18,25 +18,25 @@ loop( L ) ->
         io:format("localfiles: ~p~n",[L]),
     receive
         {P, status, NameFile} -> case lists:keyfind(NameFile,1,L) of
-                                      false -> P ! noFile ;
-                                      T -> if element(2,T)>0 -> P ! reading ;
-                                              element(3,T)>0 -> P ! writting ;
-                                              true           -> P ! unused
+                                      false -> P ! { localfilesserverResponse, noFile };
+                                      T -> if element(2,T)>0 -> P ! { localfilesserverResponse, reading };
+                                              element(3,T)>0 -> P ! { localfilesserverResponse, writting };
+                                              true           -> P ! { localfilesserverResponse, unused}
                                            end
                                   end,
                                   loop( L ) ;
         {P, delete, NameFile}     -> Lp = lists:keydelete(NameFile,1,L),
-                                   P ! ok,
+                                   P ! { localfilesserverResponse, ok},
                                    loop( Lp ) ;
         {P, openR, NameFile}     -> Lb = lists:keydelete(NameFile,1,L),
                                     T = lists:keyfind(NameFile,1,L),
                                     Lp = [ {element(1,T),element(2,T)+1,element(3,T)} | Lb ],
-                                    P ! ok,
+                                    P ! { localfilesserverResponse, ok},
                                     loop( Lp ) ;
         {P, openW, NameFile}     -> Lb = lists:keydelete(NameFile,1,L),
                                     T = lists:keyfind(NameFile,1,L),
                                     Lp = [ {element(1,T),element(2,T),element(3,T)+1} | Lb ],
-                                    P ! ok,
+                                    P ! { localfilesserverResponse, ok},
                                     loop( Lp ) ;
         {P, close, NameFile }   -> Lb = lists:keydelete(NameFile,1,L),
                                    T = lists:keyfind(NameFile,1,L),
@@ -44,10 +44,10 @@ loop( L ) ->
                                           element(3,T)>0 -> {element(1,T),element(2,T),element(3,T)-1};
                                           true -> error("No deberia suceder") end,
                                    Lp = [ Tp | Lb ],
-                                   P ! ok,
+                                   P ! { localfilesserverResponse, ok},
                                    loop( Lp ) ;
         {P, create, NameFile }   -> Lp = [{NameFile,0,0}|L],
-                                   P ! ok,
+                                   P ! { localfilesserverResponse, ok},
                                    loop( Lp ) ;
         _ -> error("esto no deberia suceder 666") 
     end.
@@ -55,16 +55,16 @@ loop( L ) ->
 setUp() -> register( localfilesserver, spawn(?MODULE,loop,[[]]) ).
 
 status( NameFile ) -> localfilesserver ! {self(), status , NameFile }, 
-                  receive X -> X end.
+                  receive { localfilesserverResponse, X } -> X end.
 delete( NameFile ) -> localfilesserver ! {self(), delete , NameFile }, 
-                  receive X -> X end.
+                  receive { localfilesserverResponse, X } -> X end.
 openR( NameFile ) -> localfilesserver ! {self(), openR , NameFile }, 
-                  receive X -> X end.
+                  receive { localfilesserverResponse, X } -> X end.
 openW( NameFile ) -> localfilesserver ! {self(), openW , NameFile }, 
-                  receive X -> X end.
+                  receive { localfilesserverResponse, X } -> X end.
 create( NameFile ) -> localfilesserver ! {self(), create , NameFile }, 
-                  receive X -> X end.
+                  receive { localfilesserverResponse, X } -> X end.
 close( NameFile ) -> localfilesserver ! {self(), close , NameFile }, 
-                  receive X -> X end.
+                  receive { localfilesserverResponse, X } -> X end.
 
 

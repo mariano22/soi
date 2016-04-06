@@ -12,15 +12,15 @@
 loop( LC, LD ) ->
     io:format("tokenqueues: ~p ~p~n",[LC,LD]),
     receive
-        {P, getCreates}  ->  P ! LC,
+        {P, getCreates}  ->  P ! {tokenqueuesserver, LC},
                                   loop( [], LD ) ;
-        {P, getDeletes}  ->  P ! LD,
+        {P, getDeletes}  ->  P ! {tokenqueuesserver, LD},
                                   loop( LC, [] ) ;
         {P, newCreate, NameFile, CId}   -> LCp = [{NameFile,CId}|LC],
-                                   P ! ok,
+                                   P ! {tokenqueuesserver, ok},
                                    loop( LCp, LD ) ;
         {P, newDelete, NameFile}   -> LDp = [NameFile|LD],
-                                   P ! ok,
+                                   P ! {tokenqueuesserver, ok},
                                    loop( LC, LDp ) ;
         _ -> error("esto no deberia suceder 666") 
     end.
@@ -28,13 +28,13 @@ loop( LC, LD ) ->
 setUp() -> register( tokenqueuesserver, spawn(?MODULE,loop,[[],[]]) ).
 
 newCreate(NameFile,CId) -> tokenqueuesserver ! {self(), newCreate, NameFile, CId }, 
-                       receive X -> X end.
+                       receive {tokenqueuesserver, X} -> X end.
 newDelete(NameFile) -> tokenqueuesserver ! {self(), newDelete, NameFile }, 
-                       receive X -> X end.
+                       receive {tokenqueuesserver, X} -> X end.
 getCreates() -> tokenqueuesserver ! {self(), getCreates }, 
-                       receive X -> X end.
+                       receive {tokenqueuesserver, X} -> X end.
 getDeletes() -> tokenqueuesserver ! {self(), getDeletes }, 
-                       receive X -> X end.
+                       receive {tokenqueuesserver, X} -> X end.
 
 
 

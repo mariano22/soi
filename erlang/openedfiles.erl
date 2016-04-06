@@ -18,13 +18,13 @@ loop( L ) ->
     receive
         {P, globalFdList , ClientId }    -> Rp = lists:filter(fun(X) -> element(2,X)==ClientId end,L),
                                             R = lists:map(fun(X) -> element(1,X) end,Rp),
-                                            P ! R ,
+                                            P ! {openedfilesserverResponse, R} ,
                                             loop( L ) ;                                    
         {P,  registerClose , GlobalFd }  -> Lp = lists:keydelete(GlobalFd,1,L),
-                                            P ! ok,
+                                            P ! {openedfilesserverResponse, ok},
                                             loop( Lp ) ;
         {P, registerOpen, GlobalFd, ClientId }   -> Lp = [{GlobalFd,ClientId}|L],
-                                   P ! ok,
+                                   P ! {openedfilesserverResponse, ok},
                                    loop( Lp ) ;
         _ -> error("esto no deberia suceder 666") 
     end.
@@ -32,11 +32,11 @@ loop( L ) ->
 setUp() -> register( openedfilesserver, spawn(?MODULE,loop,[[]]) ).
 
 registerOpen( GlobalFd, ClientId ) -> openedfilesserver ! {self(), registerOpen , GlobalFd, ClientId }, 
-                  receive X -> X end.
+                  receive {openedfilesserverResponse, X} -> X end.
 registerClose( GlobalFd ) -> openedfilesserver ! {self(), registerClose , GlobalFd }, 
-                  receive X -> X end.
+                  receive {openedfilesserverResponse, X} -> X end.
 globalFdList( ClientId ) -> openedfilesserver ! {self(), globalFdList , ClientId }, 
-                  receive X -> X end.
+                  receive {openedfilesserverResponse, X} -> X end.
 
 
 

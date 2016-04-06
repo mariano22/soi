@@ -12,15 +12,15 @@ loop( L ) ->
     io:format("localconections: ~p~n",[L]),
     receive
         {P,  newC, Cid,Pid }  ->   Lp = [{Cid,Pid}|L],
-                                   P ! ok,
+                                   P ! {localconectionsserverResponse, ok},
                                    loop( Lp ) ;
         {P, find, Cid } -> case lists:keyfind(Cid,1,L) of
-                                false -> P ! noClient ;
-                                Cr   -> P ! element(2,Cr)
+                                false -> P ! {localconectionsserverResponse, noClient } ;
+                                Cr   -> P ! {localconectionsserverResponse, element(2,Cr)}
                            end,
                            loop( L ) ;
         {P, delC, Cid }     -> Lp = lists:keydelete(Cid,1,L),
-                                   P ! ok,
+                                   P ! {localconectionsserverResponse, ok} ,
                                    loop( Lp ) ;
         _ -> error("esto no deberia suceder 66+6") 
     end.
@@ -28,9 +28,9 @@ loop( L ) ->
 setUp() -> register( localconectionsserver, spawn(?MODULE,loop,[[]]) ).
 
 newC(Cid,Pid) -> localconectionsserver ! {self(), newC, Cid,Pid }, 
-                       receive X -> X end.
+                       receive {localconectionsserverResponse, X} -> X end.
 find(Cid) -> localconectionsserver ! {self(), find, Cid }, 
-                       receive X -> X end.
+                       receive {localconectionsserverResponse, X} -> X end.
 delC(Cid) -> localconectionsserver ! {self(), delC, Cid }, 
-                       receive X -> X end.
+                       receive {localconectionsserverResponse, X} -> X end.
 

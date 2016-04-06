@@ -18,24 +18,24 @@ loop( L , FdC) ->
     receive
         {P, getHandle, Fd} -> case lists:keyfind(Fd,1,L) of
                                       false -> P ! noFd ;
-                                      T ->  P ! element(3,T)
+                                      T ->  P ! {fdmanageserverResponse, element(3,T) }
                                   end,
                                   loop( L, FdC ) ;
         {P, getOwner, Fd} -> case lists:keyfind(Fd,1,L) of
                                       false -> P ! noFd ;
-                                      T ->  P ! element(2,T)
+                                      T ->  P ! {fdmanageserverResponse, element(2,T)}
                                   end,
                                   loop( L, FdC ) ;
         {P, getNameFile, Fd} -> case lists:keyfind(Fd,1,L) of
                                       false -> P ! noFd ;
-                                      T ->  P ! element(4,T)
+                                      T ->  P ! {fdmanageserverResponse, element(4,T)}
                                   end,
                                   loop( L, FdC ) ;
         {P, unregisterFd, Fd} -> Lp = lists:keydelete(Fd,1,L),
-                                   P ! ok,
+                                   P ! {fdmanageserverResponse, ok},
                                    loop( Lp , FdC) ;
         {P, registerFd, GId, Handle, NameFile }   -> Lp = [{FdC,GId,Handle,NameFile}|L],
-                                   P ! FdC,
+                                   P ! {fdmanageserverResponse, FdC},
                                    loop( Lp, FdC+1 ) ;
         _ -> error("esto no deberia suceder 666") 
     end.
@@ -43,12 +43,12 @@ loop( L , FdC) ->
 setUp() -> register( fdmanageserver, spawn(?MODULE,loop,[[],0]) ).
 
 getHandle( Fd ) -> fdmanageserver ! {self(), getHandle , Fd }, 
-                  receive X -> X end.
+                  receive {fdmanageserverResponse,X} -> X end.
 getNameFile( Fd ) -> fdmanageserver ! {self(), getNameFile , Fd }, 
-                  receive X -> X end.
+                  receive {fdmanageserverResponse,X} -> X end.
 getOwner( Fd ) -> fdmanageserver ! {self(), getOwner , Fd }, 
-                  receive X -> X end.
+                  receive {fdmanageserverResponse,X} -> X end.
 unregisterFd( Fd ) -> fdmanageserver ! {self(), unregisterFd , Fd }, 
-                  receive X -> X end.
+                  receive {fdmanageserverResponse,X} -> X end.
 registerFd( GId, Handle, NameFile ) -> fdmanageserver ! {self(), registerFd ,GId, Handle, NameFile }, 
-                  receive X -> X end.
+                  receive {fdmanageserverResponse,X} -> X end.

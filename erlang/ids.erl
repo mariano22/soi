@@ -5,13 +5,13 @@
 loop( L ) ->
     io:format("myid: ~p~n",[L]),
     receive
-        {P, myId } -> P ! L, loop(L)
+        {P, myId } -> P ! {idserverResponse, L}, loop(L)
     end.
 
 setUp(MyId) -> register( idserver, spawn(?MODULE,loop,[MyId]) ).
 
 myId( ) -> idserver ! { self(), myId }, 
-           receive X -> X end.
+           receive {idserverResponse, X} -> X end.
 nextWorkerId() -> 
     A =( myId() +  1 ),
     B = workerdirs:wlen(),

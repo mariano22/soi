@@ -15,24 +15,24 @@ loop( T, F ) ->
 % DEBUG
 %    io:format("tokencontrol: ~p ~p~n",[T,F]), 
     receive
-        { P, getT }  ->  P ! T,
+        { P, getT }  ->  P ! {tokencontrolserverResponse, T },
                            loop( nothing , false ) ;
         {_, recvT, TT}   ->  loop( TT, true ) ;
-        {P, mustProc}   -> P ! F,
+        {P, mustProc}   -> P ! {tokencontrolserverResponse, F},
                                 loop(T,F) ;
         _ -> error("esto no deberia suceder 666")
     end.
 setUp() -> register( tokencontrolserver, spawn(?MODULE,loop,[nothing,false]) ).
-tickTime() -> 8000.
+tickTime() -> 1000.
 recvT_aux(TT) -> 
             receive after tickTime() -> ok end,
             tokencontrolserver ! {self(), recvT, TT }, 
             ok.
 recvT(TT) -> spawn(?MODULE,recvT_aux,[TT]), ok.
 getT() -> tokencontrolserver ! {self(), getT }, 
-                       receive X -> X end.
+                       receive {tokencontrolserverResponse, X} -> X end.
 mustProc()-> tokencontrolserver ! {self(), mustProc }, 
-                       receive X -> X end.
+                       receive {tokencontrolserverResponse, X} -> X end.
 
 makeToken(LA,LB) -> {LA,LB}.
 getListaAltas({LA,_}) -> LA.
