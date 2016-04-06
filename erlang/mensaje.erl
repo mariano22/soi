@@ -8,7 +8,7 @@ say(M) -> lists:foldr( fun(X,A)->X++" "++A end, "\n", M).
 
 archivoNoExiste()    -> addArg("notExist",mErr()).
 archivoOcupado()     -> addArg("Ocuppied",mErr()).
-archivaExistente()   -> addArg("Exist",mErr()).
+archivoExistente()   -> addArg("Exist",mErr()).
 permisoDenegado()    -> addArg("AccessDenied",mErr()).
 finDeArchivo() -> addArg("EOF",mErr()).
 
