@@ -36,7 +36,10 @@ proc( userCreate , Task ) ->
     Name = task:fileName(Task),
     C    = task:cliente(Task),
     case globalfiles:getOwner(Name) of
-         noOwner -> tokenqueues:newCreate(Name,C);
+         noOwner -> case tokenqueues:isInCreate(Name) of
+                         true  -> comunic:responderCliente(C, mensaje:archivoExistente());
+                         false -> tokenqueues:newCreate(Name,C)
+                    end;
          _       -> comunic:responderCliente(C, mensaje:archivoExistente())
     end,
     ok;
