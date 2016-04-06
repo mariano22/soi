@@ -10,7 +10,7 @@ archivoNoExiste()    -> addArg("notExist",mErr()).
 archivoOcupado()     -> addArg("Ocuppied",mErr()).
 archivoExistente()   -> addArg("Exist",mErr()).
 permisoDenegado()    -> addArg("AccessDenied",mErr()).
-finDeArchivo() -> addArg("EOF",mErr()).
+finDeArchivo()       -> addArg("EOF",mErr()).
 
 
 archivoCreado()      -> addArg("Create",mOk()).

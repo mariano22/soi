@@ -37,7 +37,7 @@ proc( userCreate , Task ) ->
     C    = task:cliente(Task),
     case globalfiles:getOwner(Name) of
          noOwner -> tokenqueues:newCreate(Name,C);
-         _       -> responderClienteRemoto(C, mensaje:archivoExistente())
+         _       -> comunic:responderCliente(C, mensaje:archivoExistente())
     end,
     ok;
 
