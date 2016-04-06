@@ -16,6 +16,12 @@ loop( LC, LD ) ->
                                   loop( [], LD ) ;
         {P, getDeletes}  ->  P ! {tokenqueuesserver, LD},
                                   loop( LC, [] ) ;
+        {P, isInCreate, NameFile}  ->  case lists:keyfind(NameFile,1,LC) of
+                                       false -> P ! {tokenqueuesserver, false};
+                                       _ -> P ! {tokenqueuesserver, true}
+                                    end,
+                                  loop( LC, LD ) ;
+
         {P, newCreate, NameFile, CId}   -> LCp = [{NameFile,CId}|LC],
                                    P ! {tokenqueuesserver, ok},
                                    loop( LCp, LD ) ;
@@ -35,6 +41,7 @@ getCreates() -> tokenqueuesserver ! {self(), getCreates },
                        receive {tokenqueuesserver, X} -> X end.
 getDeletes() -> tokenqueuesserver ! {self(), getDeletes }, 
                        receive {tokenqueuesserver, X} -> X end.
-
+isInCreate(NameFile) -> tokenqueuesserver ! {self(), isInCreate, NameFile }, 
+                       receive {tokenqueuesserver, X} -> X end.
 
 
