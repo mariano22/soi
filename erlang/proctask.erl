@@ -289,6 +289,7 @@ proc ( userBye, Task )->
              Orden = task:crear_workerCloseBye(Gfd),
              W     = ids:globalFdToWorker(Gfd),
              comunic:enviarWorker(W,Orden),
+             openedfiles:registerClose(Gfd),
              ok
           end,
     lists:foreach(Fun,GlobalFD),
