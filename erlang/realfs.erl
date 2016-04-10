@@ -10,6 +10,7 @@
 % write : Handle, String -> ok (escribe String en el archivo)
 % create : String -> ok (crea un archivo)
 % delete : String -> ok (crea un archivo existente)
+% close : Handle -> ok (cierra un archivo) TODO: MODIFICAR proctask y usarlo, porque nunca se usa!!
 
 
 
