@@ -14,7 +14,7 @@ cliente({_, L})  -> element(2,lists:keyfind(cliente,1,L)).
 sizeTxt({_, L})  -> element(2,lists:keyfind(sizeTxt,1,L)).
 strTxt({_, L})   -> element(2,lists:keyfind(strTxt,1,L)).
 mensaje({_, L})  -> element(2,lists:keyfind(mensaje,1,L)).
-token({_, L})  -> element(2,lists:keyfind(token,1,L)).
+token({_, L})    -> element(2,lists:keyfind(token,1,L)).
 
 crear_workerDelete(Name, IdG)      -> { workerDelete, [{fileName,Name},{idGlobal,IdG}] }.
 
@@ -35,6 +35,7 @@ crear_workerCloseSucc(Gfd, IdG)    -> { workerCloseSucc, [{idGlobal,IdG},{fdGlob
 crear_workerCloseBye(Gfd)          -> { workerCloseBye, [{fdGlobal,Gfd}] }.
 
 crear_workerSay(C, Msj )           -> { workerSay, [{cliente,C},{mensaje,Msj}] }.
+
 crear_workerToken(Token)           -> { workerToken, [{token,Token}] }.
 
 toData(X) -> term_to_binary(X).

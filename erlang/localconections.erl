@@ -22,7 +22,7 @@ loop( L ) ->
         {P, delC, Cid }     -> Lp = lists:keydelete(Cid,1,L),
                                    P ! {localconectionsserverResponse, ok} ,
                                    loop( Lp ) ;
-        _ -> error("esto no deberia suceder 66+6") 
+        _ -> error("esto no deberia suceder 666") 
     end.
 
 setUp() -> register( localconectionsserver, spawn(?MODULE,loop,[[]]) ).

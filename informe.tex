@@ -1,0 +1,71 @@
+% pdflatex -shell-escape Informe.tex
+
+\documentclass[11pt]{article}
+\usepackage{ifxetex}
+\ifxetex
+    % XeLaTeX
+    \usepackage{polyglossia}
+    \setmainlanguage{spanish}
+    \usepackage[T1]{fontenc}
+\else
+    % default: pdfLaTeX
+    \usepackage{babel}
+    \usepackage[T1]{fontenc}
+    %\usepackage{lmodern}
+    \usepackage[adobe-utopia]{mathdesign}
+    \usepackage[utf8]{inputenc}
+    \usepackage[babel=true]{microtype}
+\fi
+
+
+
+
+\begin{document}
+
+\title{Ssistemas Operativos I\\ 
+        Trabajo Pr\'actico Final}
+\author{Crosetti Mariano Jos\'e\\Rinaldi, Lautaro Daniel}
+\date{NN de MMMMMM de 2016}
+\maketitle
+\newpage
+
+%\newpage
+%\textless  \textgreater
+\section{Decisiones tomadas}
+
+Los puntos opcionales realizados (en el codigo de erlang)  fueron:
+\begin{itemize}
+\item Sistema de archivos real
+\item Posicionar los workers en distintas PC's
+\item Opción de abrir los archivos como lectura o escritura
+\end{itemize}
+
+
+La realización del trabajo se fue por modulos, cada uno encargado de bien definidas. Los modulos realizados son los siguientes:
+\begin{itemize}
+\item comunic: encargado de la comunicación entre distintos workers(PC's) y entre workers y clientes.
+\item dispatcher: encargado de asignar (o "redirigir") un cliente a un worker.
+\item fdmanage: Se encarga de dar acceso a los archivos reales y contiene la correspondencia entre identidicadores.
+\item globalfiles: Mantiene la lista de archivos de todo el sistema actualizada, y contiene la funciones para saber donde esta cada uno.
+\item ids: contiene la información necesaria referente a los identificadores (tanto de workers como clientes).
+\item localconections: maneja la creacion y eliminacion de las conecciones de los clientes.
+\item localfiles: controla el estado de los los archivos propios de cada worker incluida la creacion y eliminacion.
+\item mensaje: tiene la deficion de los mensajes usados.
+\item openedfiles: control sobre los archivos abiertos y que clientes los tomaron.
+\item proctask: Se encarga de como procede un determinado worker teniendo en cuenta la orden que recibe.
+\item realfs: este modulo es el encargado de encapsular la interaccion con el sistema de archivos real subyacente.
+\item tokenqueues: permite el acceso a las colas de creacion y borrado del token.
+\item workerdirs: CRE0 Contiene las funciones para acceder a los puertos y las direcciones de los workers
+\item task: contiene las funciones capaces de crear las oredenes y brinda las herramientas para sacar informacion de estas.
+\item tokencontrol: Este es el modulo que encapsula el manejo del token.
+\item worker: Ademas de controlar e inicializar el worker NO SE QUE HACE.
+\item parser: VOS SABRÁS
+\item sockaux: VOS SABRÁS
+\end{itemize}
+
+El manejo de concurrencias es uno de los puntos importantes, este decidimos implementando untilizacion token ring como un anillo virtual que pasaba por todos los workers, el token es el encargado de tranferir la información critica (archivos creados y archivos borrados) para que así no exista la posibilidad de exitan dos archivos con el mismo nombre, aunque para lograr esto, se tuvo que acceder (dentro de un mismo worker) a la lista de espera de creados, pués en otro caso dos usuarios conectados al mismo worker y intentando crear el mismo archivo ocacionarían un fallo.
+
+
+
+
+\end{document}
