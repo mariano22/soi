@@ -58,12 +58,14 @@ La realización del trabajo se fue por modulos, cada uno encargado de bien defin
 \item workerdirs: CRE0 Contiene las funciones para acceder a los puertos y las direcciones de los workers
 \item task: contiene las funciones capaces de crear las oredenes y brinda las herramientas para sacar informacion de estas.
 \item tokencontrol: Este es el modulo que encapsula el manejo del token.
-\item worker: Ademas de controlar e inicializar el worker NO SE QUE HACE.
-\item parser: VOS SABRÁS
-\item sockaux: VOS SABRÁS
+\item worker: Ademas de controlar e inicializar el worker NO SE QUE HACE.-----------------------------
+\item parser: VOS SABRÁS----------------------------------
+\item sockaux: VOS SABRÁS---------------------------------
 \end{itemize}
 
-El manejo de concurrencias es uno de los puntos importantes, este decidimos implementando untilizacion token ring como un anillo virtual que pasaba por todos los workers, el token es el encargado de tranferir la información critica (archivos creados y archivos borrados) para que así no exista la posibilidad de exitan dos archivos con el mismo nombre, aunque para lograr esto, se tuvo que acceder (dentro de un mismo worker) a la lista de espera de creados, pués en otro caso dos usuarios conectados al mismo worker y intentando crear el mismo archivo ocacionarían un fallo.
+Los datos a los que se tenia que tener acceso en todo momento los asignamos a "variables globales" que en realidad son procesos ejecutandose constantemente y llevan la informacion necesaria.
+
+El manejo de concurrencias es uno de los puntos importantes, este decidimos implementando untilizacion token ring como un anillo virtual que pasaba por todos los workers, el token es el encargado de tranferir la información critica (archivos creados y archivos borrados) para que así no exista la posibilidad de exitan dos archivos con el mismo nombre, aunque para lograr esto, se tuvo que acceder (dentro de un mismo worker) a la lista de espera de creados, pués en otro caso dos usuarios conectados al mismo worker y intentando crear el mismo archivo ocacionarían un fallo.("EXPLICAR BIEN TOKEN RING" ESO HACE VOS PORQUE NO SE QUE CARAJO QUERES QUE DIGA)
 
 
 
