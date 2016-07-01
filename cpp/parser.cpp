@@ -1,10 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <cassert>
-#include <sstream>
-#define forall(it,v) for(typeof(v.begin()) it=v.begin();it!=v.end();++it)
-using namespace std;
+#include "parser.h"
 
 vector<string> parser(const string& input) {
 	string aux;
@@ -14,11 +8,4 @@ vector<string> parser(const string& input) {
         res.push_back(aux);
 	return res;
 }
-/*
-int main() {
-	//~ string a("  REA FD  10  SIZE   20  ");
-	//~ vector<string> r = parser(a);
-	//~ forall(it,r) cout << "MyWord: " << *it << endl;
-	return 0;
-}
-*/
+

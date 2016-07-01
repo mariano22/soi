@@ -1,12 +1,4 @@
-#include <iostream>
-#include <cstdlib>
-#include <cstdio>
-#include <vector>
-#include <map>
-#include <cassert>
-using namespace std;
-
-typedef FILE* RealFSHandle;
+#include "realFs.h"
 
 RealFSHandle openr(const string& fileName) {
 	return fopen (fileName.c_str(),"r");
@@ -35,6 +27,3 @@ void close(RealFSHandle h) {
 	fclose(h);
 }
 
-int main() {
-	return 0;
-}

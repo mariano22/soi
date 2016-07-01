@@ -1,28 +1,31 @@
 #ifndef IDS_H
 #define IDS_H
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <cassert>
+#include <utility> 
+#include <string> 
 using namespace std;
 
-//ver de donde se importa
 typedef int WorkerId;
-WorkerId noWorkerId=-1;
+const WorkerId noWorkerId=-1;
 typedef int ClientId;
+const ClientId noClientId=-1;
 typedef pair<int,int> GlobalId;
-
+typedef int ClientId;
 typedef int GlobalFd;
 typedef int LocalFd;
+//typedef int RealFSHandle;
+
+string   globalFdToString(const GlobalFd& gFd);
+string   clientIdToString(const ClientId& cId);
+GlobalFd stringToGlobalFd(const string& sgFd);
 class idsManage {
 	public:
-		static GlobalId  makeIdGlobal(WorkerId wId,ClientId cId);
+		static GlobalId makeIdGlobal(WorkerId wId,ClientId cId);
 		static WorkerId globalIdToWorker(GlobalId gId);
 		static ClientId globalIdToClient(GlobalId gId);
 
 		static WorkerId globalFdToWorker(GlobalFd gFd);
-		static LocalFd globalFdToLocalFd(GlobalFd gFd);
+		static LocalFd  globalFdToLocalFd(GlobalFd gFd);
 		static GlobalFd makeGlobalFd(LocalFd lFd, WorkerId wId);
 		
 		idsManage(WorkerId myWId) : myWId(myWId) {}

@@ -5,19 +5,10 @@
 #include <vector>
 #include <map>
 #include <cassert>
+#include <string> 
+#include "realFs.h"
+#include "ids.h"
 using namespace std;
-
-//ver de donde importar
-typedef int LocalFd;
-typedef pair<int,int> GlobalId;
-typedef int RealFSHandle
-
-//~ % Funciones:
-//~ % getHandle : LocalFd -> Handle (Dado un Fd devuelve el Handle del sistema de archivos real)
-//~ % getOwner  : LocalFd -> GlobalId (Dado un Fd devuelve el usuario que lo posee)
-//~ % getNameFile  : LocalFd -> String (Dado un Fd devuelve el nombre del archivo que es)
-//~ % unregisterFd : LocalFd -> ok (Borra un Fd de la tabla)
-//~ % registerFd : Globalid,NameFile,Handle -> LocalFd (Registra un nuevo Fd la tabla y devuelve le Fd asignado)
 
 class fdManage {
 	public:
