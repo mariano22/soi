@@ -15,14 +15,17 @@ void syncQueues<T>::push(T e) {
 template<class T>
 bool syncQueues<T>::recv(T& rv, int miliSeconds) {
 	pthread_mutex_lock(&lock);
+	if (miliSeconds>0) {
+		struct timespec timevar;
+		clock_gettime(CLOCK_REALTIME, &timevar);
+		timevar.tv_nsec += ((miliSeconds%1000)*1000000);
+		timevar.tv_nsec %= 1000000000;
+		timevar.tv_sec += miliSeconds/1000;
 	
-	struct timespec timevar;
-	clock_gettime(CLOCK_REALTIME, &timevar);
-	timevar.tv_nsec += ((miliSeconds%1000)*1000000);
-	timevar.tv_nsec %= 1000000000;
-	timevar.tv_sec += miliSeconds/1000;
-	
-	pthread_cond_timedwait(&condvar, &lock,&timevar);
+		if(!cola.size()) pthread_cond_timedwait(&condvar, &lock,&timevar);
+	} else {
+		while(!cola.size()) pthread_cond_wait(&condvar, &lock);
+	}
 	
 	bool rflag = cola.size();
 	if (rflag) { 
