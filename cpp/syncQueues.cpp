@@ -13,7 +13,7 @@ void syncQueues<T>::push(T e) {
 	pthread_cond_signal(&condvar);
 }
 template<class T>
-bool syncQueues<T>::recv(T* rv, int miliSeconds) {
+bool syncQueues<T>::recv(T& rv, int miliSeconds) {
 	pthread_mutex_lock(&lock);
 	
 	struct timespec timevar;
@@ -26,7 +26,7 @@ bool syncQueues<T>::recv(T* rv, int miliSeconds) {
 	
 	bool rflag = cola.size();
 	if (rflag) { 
-		*rv = cola.front(); 
+		rv = cola.front(); 
 		cola.pop(); 
 	}
 	pthread_mutex_unlock(&lock);

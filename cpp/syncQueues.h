@@ -12,7 +12,7 @@ class syncQueues {
 	public:
 	syncQueues();
 	void push(T e);
-	bool recv(T* rv, int miliSeconds);
+	bool recv(T& rv, int miliSeconds);
 	private:
 	queue<T> cola;
 	pthread_mutex_t lock;

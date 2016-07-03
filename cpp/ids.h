@@ -3,6 +3,7 @@
 
 #include <utility> 
 #include <string> 
+extern int workerCant; // de workerMain
 using namespace std;
 
 typedef int WorkerId;
@@ -13,7 +14,6 @@ typedef pair<int,int> GlobalId;
 typedef int ClientId;
 typedef int GlobalFd;
 typedef int LocalFd;
-//typedef int RealFSHandle;
 
 string   globalFdToString(const GlobalFd& gFd);
 string   clientIdToString(const ClientId& cId);
@@ -30,7 +30,7 @@ class idsManage {
 		
 		idsManage(WorkerId myWId) : myWId(myWId) {}
 		WorkerId myId();
-		//~ WorkerId nextWorkerId() { return (myWId+1)%workerDirs::wlen(); } inlcuir workerDirs y descomentar linea
+		WorkerId nextWorkerId();
 	private:
 		WorkerId myWId;
 };

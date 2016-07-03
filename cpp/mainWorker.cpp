@@ -4,9 +4,10 @@
 #include "localFiles.h"
 #include "openedFiles.h"
 #include "tokenControl.h"
-#include "workerDirs.h"
 #include "workerScope.h"
 #include "task.h"
+#include "ids.h"
+#include "procTask.h"
 #include "mainWorker.h"
 using namespace std;
 #define dprint(v) cerr << #v"=" << v << endl //;)
@@ -22,41 +23,29 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> ii;
 
-
-workerDirs wList;
 syncQueues<task> *workerQueues = NULL;
+localConections *workerConections = NULL;
+
+void procToken(WorkerScope* myScope) {
+	assert(false); /* TODO */
+}
 
 void* mainWorker(void *pid) { 
 	int id = *(int*)pid;
-	WorkerScope *myScope = new WorkerScope;
-	// setUpComunic(myScope);
-	if (!id) MytokenControl.recvT(token());
+	WorkerScope *myScope = new WorkerScope(id);
+	myScope->MysyncQueues = &workerQueues[id];
+	myScope->MylocalConections = &workerConections[id];
+	
+	if (!id) myScope->MytokenControl.recvT(token());
 	while(true) {
-		task *t;
-		myScope->MysyncQueues.recv(t,MytokenControl.tickTime());
-		// procTask(t);
-		if (MytokenControl.mustProc()) {
-			// procesar token
+		task t;
+		myScope->MysyncQueues->recv(t,myScope->MytokenControl.tickTime());
+		procTask(myScope,t);
+		if (myScope->MytokenControl.mustProc()) {
+			procToken(myScope);
 		}
 	}
+	delete myScope;
 	return NULL;
 }
 
-int main() {
-    wList.init("workerlist");
-    pthread_t *wfs = (pthread_t *) malloc(wList.wlen()*sizeof(pthread_t));
-    int *ids = new int[wList.wlen()];
-    workerQueues = new syncQueues<task>[wList.wlen()];
-    for(int i=0 ; i < wList.wlen() ; i++) {
-		ids[i]=i;
-		pthread_create(&wfs[i], 0, mainWorker, &ids[i]); 
-	}
-	for(int i=0 ; i < wList.wlen() ; i++) 
-		pthread_join(wfs[i],NULL);
-		
-	delete[] ids;
-	delete[] workerQueues;
-	free(wfs);
-    
-    return 0;
-}

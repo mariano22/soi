@@ -35,5 +35,5 @@ LocalFd  idsManage::globalFdToLocalFd(GlobalFd gFd) { return gFd/10; }
 GlobalFd idsManage::makeGlobalFd(LocalFd lFd, WorkerId wId) { return lFd*10+wId; }
 
 WorkerId idsManage::myId() { return myWId; }
-//~ WorkerId nextWorkerId() { return (myWId+1)%workerDirs::wlen(); } inlcuir workerDirs y descomentar linea
+WorkerId idsManage::nextWorkerId() { return (myWId+1)%workerCant; }
 
