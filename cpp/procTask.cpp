@@ -1,4 +1,7 @@
 #include <bits/stdc++.h>
+#include "comunic.h"
+#include "mensaje.h"
+
 using namespace std;
 #define dprint(v) cerr << #v"=" << v << endl //;)
 #define forr(i,a,b) for(int i=(a); i<(b); i++)
@@ -27,6 +30,8 @@ struct task {
 void procTask(WorkerScope *who,const task& t) {
 	switch (t.getTaskName()) {
 		case userLsd:
+				ClientId c=getCliente().t;
+				responderCliente(c,coneccionEstablecida(c));
 		break;
 		case userDelete:
 		break;
