@@ -1,11 +1,6 @@
 #include <bits/stdc++.h>
 #include <string>
-#include "ids.h"
-#include "task.h"
-#include "comunic.h"
-#include "mensaje.h"
-#include "globalFiles.h"
-#include "tokenQueues.h"
+#include "procTask.h"
 
 using namespace std;
 #define forall(it,v) for(typeof(v.begin()) it=v.begin();it!=v.end();++it)
@@ -53,9 +48,54 @@ void caseUserCreate(WorkerScope *who,task& t){
 		};
 	}; 
 }
+void caseUserOpenRead(WorkerScope *who,task& t){
+	string name = t.getFileName();
+	ClientId cID = t.getCliente();
+	GlobalId gID = idsManage::makeIdGlobal(who->MyIdsManage.myId(), cID);
+	WorkerId wID = who->MyglobalFiles.getOwner(name);
+	if (noWorkerId==wID){
+		responderCliente(cID,mensaje::archivoNoExiste(),who);
+	}else{
+		task t2 = task::crear_workerOpenRead(name,gID);
+		enviarWorker(wID,t2);
+	}; 
+}
+
+void caseUserOpenWrite(WorkerScope *who,task& t){
+	string name = t.getFileName();
+	ClientId cID = t.getCliente();
+	GlobalId gID = idsManage::makeIdGlobal(who->MyIdsManage.myId(), cID);
+	WorkerId wID = who->MyglobalFiles.getOwner(name);
+	if (noWorkerId==wID){
+		responderCliente(cID,mensaje::archivoNoExiste(),who);
+	}else{
+		task t2 = task::crear_workerOpenWrite(name,gID);
+		enviarWorker(wID,t2);
+	}; 
+}
+
 void caseUserDelete(WorkerScope *who,task& t){
-	int a=3;
+	string name  = t.getFileName();
+	ClientId cID = t.getCliente();
+	GlobalId gID = idsManage::makeIdGlobal(who->MyIdsManage.myId(), cID);
+	WorkerId wID = who->MyglobalFiles.getOwner(name);
+	if (noWorkerId==wID){
+		responderCliente(cID,mensaje::archivoNoExiste(),who);
+	}else{
+		task t2 = task::crear_workerDelete(name,gID);
+		enviarWorker(wID,t2);
+	}; 
+}
+
+void caseUserBye(WorkerScope *who,task& t){
+	ClientId cID = t.getCliente();
+	vector<GlobalFd> gFds = who->MyopenedFiles.globalFdList(cID);
+	responderCliente(cID,mensaje::mOk(),who);
 	
+	
+	
+	//	task t2 = task::crear_workerDelete(name,gID);
+		//enviarWorker(wID,t2);
 }
 	
 	
@@ -70,12 +110,14 @@ void procTask(WorkerScope *who,task& t) {
 		case userCreate:
 			caseUserCreate(who,t);
 		break;
-		case userDelete:
-			caseUserDelete(who,t);
-		break;
 		case userOpenRead:
+			caseUserOpenRead(who,t);
 		break;
 		case userOpenWrite:
+			caseUserOpenWrite(who,t);
+		break;
+		case userDelete:
+			caseUserDelete(who,t);
 		break;
 		case userWrite:
 		break;
@@ -84,6 +126,7 @@ void procTask(WorkerScope *who,task& t) {
 		case userClose:
 		break;
 		case userBye:
+			caseUserBye(who,t);
 		break;
 		case workerDelete:
 		break;

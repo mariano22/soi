@@ -8,7 +8,6 @@
 #include "openedFiles.h"
 #include "tokenControl.h"
 #include "tokenQueues.h"
-#include "workerDirs.h"
 #include "task.h"
 #include "syncQueues.h"
 #include "localConections.h"
