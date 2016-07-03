@@ -7,6 +7,7 @@
 #include "workerDirs.h"
 #include "workerScope.h"
 #include "task.h"
+#include "mainWorker.h"
 using namespace std;
 #define dprint(v) cerr << #v"=" << v << endl //;)
 #define forr(i,a,b) for(int i=(a); i<(b); i++)
@@ -23,7 +24,7 @@ typedef pair<int,int> ii;
 
 
 workerDirs wList;
-syncQueues<task> *workerQueues;
+syncQueues<task> *workerQueues = NULL;
 
 void* mainWorker(void *pid) { 
 	int id = *(int*)pid;
