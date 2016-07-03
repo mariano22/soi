@@ -3,7 +3,7 @@
 #include "procTask.h"
 
 using namespace std;
-#define forall(it,v) for(typeof(v.begin()) it=v.begin();it!=v.end();++it)
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
 
 #define dprint(v) cerr << #v"=" << v << endl //;)
 #define forr(i,a,b) for(int i=(a); i<(b); i++)
@@ -100,6 +100,33 @@ void caseUserBye(WorkerScope *who,task& t){
 			who->MyopenedFiles.registerClose(*it);
 	}
 }
+
+void caseUserWrite(WorkerScope *who,task& t){
+	ClientId cID = t.getCliente();
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = idsManage::makeIdGlobal(who->MyIdsManage.myId(),cID);
+	bool b=false;
+	forall(it, (who->MyopenedFiles.globalFdList(cID))){ 
+		b = b || (*it==gFd);
+	}
+	string txt;
+	if (b){
+		int sizeF = t.getSizeTxt();
+		int sizeA = (t.getStrTxt()).size();
+		if(sizeF<sizeA){
+			txt = t.getStrTxt(); 
+		}else{
+			txt = t.getStrTxt().substr(0,sizeF);
+		}
+		WorkerId w = idsManage::globalFdToWorker(gFd);
+		task order = task::crear_workerWrite(txt, idG);
+		comunic:enviarWorker(w,order);
+	}else{
+		responderCliente(cID, mensaje::permisoDenegado(), who);
+	}
+	
+	
+}
 	
 	
 void procTask(WorkerScope *who,task& t) {
@@ -123,6 +150,7 @@ void procTask(WorkerScope *who,task& t) {
 			caseUserDelete(who,t);
 		break;
 		case userWrite:
+			caseUserWrite(who,t);
 		break;
 		case userRead:
 		break;
