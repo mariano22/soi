@@ -6,14 +6,16 @@
 #include <map>
 #include <cassert>
 #include "ids.h"
+#include "mensaje.h"
+#include "syncQueues.h"
 
 class localConections {
 	public:
-		ClientId find(const WorkerId& wId);
-		void delC(const WorkerId& wId);
-		void newC(const WorkerId& wId, ClientId id);
+		syncQueues<mensaje>* find(const ClientId& cId);
+		void delC(const ClientId& cId);
+		void newC(const ClientId& cId, syncQueues<mensaje>* qp);
 	private:
-		map< ClientId,WorkerId > m;
+		map< ClientId,syncQueues<mensaje>* > m;
 };
 
 #endif
