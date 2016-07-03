@@ -5,6 +5,7 @@
 #include "openedFiles.h"
 #include "tokenControl.h"
 #include "workerDirs.h"
+#include "workerScope.h"
 #include "task.h"
 using namespace std;
 #define dprint(v) cerr << #v"=" << v << endl //;)
@@ -20,16 +21,6 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> ii;
 
-class WorkerScope {
-	public:
-		globalFiles MyglobalFiles;
-		fdManage MyfdManage;
-		localFiles MylocalFiles;
-		openedFiles MyopenedFiles;
-		tokenControl MytokenControl;
-		tokenQueues MytokenQueues;
-		syncQueues MysyncQueues;
-};
 
 workerDirs wList;
 syncQueues<task> *workerQueues;
