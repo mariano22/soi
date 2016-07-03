@@ -17,6 +17,7 @@ class tokenQueues {
 		void newDelete(const string& fileName);
 		vector< pair<string,ClientId> > getCreates();
 		vector< string > getDeletes();
+		bool isInCreate(string fileName);
 	private:
 		map< string,ClientId > c;
 		set<string> d;

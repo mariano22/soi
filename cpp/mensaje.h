@@ -25,11 +25,12 @@ class mensaje {
 		static mensaje archivoReadSucc(const string& Txt);
 		static mensaje archivoAbierto(const GlobalFd& gFd);
 		static mensaje coneccionEstablecida(const ClientId& cId);
-		
+
+		void addArg(const string& arg);		
 		string say();
 	private:
 		void setHeader(const string& h);
-		void addArg(const string& arg);
+
 		string header;
 		vector<string> args;
 		
