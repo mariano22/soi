@@ -22,8 +22,10 @@ class WorkerScope {
 		openedFiles MyopenedFiles;
 		tokenControl MytokenControl;
 		tokenQueues MytokenQueues;
-		syncQueues<task> MysyncQueues;
-		localConections MylocalConections;
+		syncQueues<task> *MysyncQueues;
+		localConections *MylocalConections;
+		idsManage MyIdsManage;
+		WorkerScope(WorkerId myWId) : MyIdsManage(myWId) {}
 };
 
 #endif
