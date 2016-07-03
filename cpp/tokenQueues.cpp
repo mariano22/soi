@@ -23,5 +23,7 @@ vector< string > tokenQueues::getDeletes() {
 	c.clear();
 	return result;
 }
-
+bool tokenQueues::isInCreate(string fileName) {
+	return c.find(fileName) != c.end();
+}
 
