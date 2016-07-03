@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <pthread.h>
 #include "globalFiles.h"
 #include "fdManage.h"
 #include "localFiles.h"
@@ -9,6 +10,7 @@
 #include "procTask.h"
 #include "mainWorker.h"
 #include "dispatcher.h"
+#include "syncQueues.h"
 using namespace std;
 
 int main() {

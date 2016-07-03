@@ -1,9 +1,9 @@
 appname := main
 
 CXX := g++ 
-CXXFLAGS := -lpthread
+CXXFLAGS := -lpthread -std=c++11
 
-srcfiles := comunic.cpp dispatcher.cpp fdManage.cpp globalFiles.cpp ids.cpp localConections.cpp localFiles.cpp mainWorker.cpp main.cpp mensaje.cpp openedFiles.cpp parser.cpp procTask.cpp realFs.cpp sockaux.cpp syncQueues.cpp task.cpp tokenControl.cpp tokenQueues.cpp
+srcfiles := comunic.cpp dispatcher.cpp fdManage.cpp globalFiles.cpp ids.cpp localConections.cpp localFiles.cpp mainWorker.cpp main.cpp mensaje.cpp openedFiles.cpp parser.cpp procTask.cpp realFs.cpp sockaux.cpp task.cpp tokenControl.cpp tokenQueues.cpp
 objects  := $(patsubst %.cpp, %.o, $(srcfiles))
 
 all: $(appname)
