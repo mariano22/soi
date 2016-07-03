@@ -91,11 +91,14 @@ void caseUserBye(WorkerScope *who,task& t){
 	ClientId cID = t.getCliente();
 	vector<GlobalFd> gFds = who->MyopenedFiles.globalFdList(cID);
 	responderCliente(cID,mensaje::mOk(),who);
-	
-	
-	
-	//	task t2 = task::crear_workerDelete(name,gID);
-		//enviarWorker(wID,t2);
+	WorkerId w;
+	task order;
+	forall(it,gFds){
+			order=task::crear_workerCloseBye(*it);
+			w=idsManage::globalFdToWorker(*it);
+			enviarWorker(w,order);
+			who->MyopenedFiles.registerClose(*it);
+	}
 }
 	
 	
@@ -151,10 +154,4 @@ void procTask(WorkerScope *who,task& t) {
 		case workerToken:
 		break;
 	}
-}
-
-
-int main() {
-    
-    return 0;
 }
