@@ -12,12 +12,12 @@ using namespace std;
 
 typedef FILE* RealFSHandle;
 
-RealFSHandle openr(const string& fileName);
-RealFSHandle openw(const string& fileName);
+RealFSHandle openr(string fileName);
+RealFSHandle openw(string fileName);
 bool read(RealFSHandle h, int sz, string &data);
 void write(RealFSHandle h, const string& txt);
-void createf(const string& fileName);
-void deletef(const string& fileName);
+void createf(string fileName);
+void deletef(string fileName);
 void close(RealFSHandle h);
 
 #endif

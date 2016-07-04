@@ -14,6 +14,9 @@ void tokenQueues::newDelete(const string& fileName) {
 	d.insert(fileName);
 }
 vector< pair<string,ClientId> > tokenQueues::getCreates() {
+	// DEBUG
+	//~ cout << "DEBUG 1: " << c.size()  << endl;
+	//~ if (c.size()) cout << "HAY ALGO INTERESANTE!!!!!!!!!!!" << endl;
 	vector< pair<string,ClientId> > result;
 	for(map<string,ClientId>::iterator it = c.begin() ; it != c.end() ; ++it) 
 		result.push_back(*it);
@@ -24,7 +27,7 @@ vector< string > tokenQueues::getDeletes() {
 	vector< string > result;
 	for(set<string>::iterator it = d.begin() ; it != d.end() ; ++it) 
 		result.push_back(*it);
-	c.clear();
+	d.clear();
 	return result;
 }
 bool tokenQueues::isInCreate(string fileName) {

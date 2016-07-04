@@ -3,7 +3,7 @@
 
 void enviarWorker(const WorkerId& dest,const task& t) {
 	#ifdef DEBUG_FLAG
-	//~ cout << "COMUNIC: respuesta de worker " << ws->MyIdsManage.myId() << " al worker " << dest << " con el task:\n" << task.say() << endl << endl;
+	cout << "COMUNIC: respuesta al worker " << dest << " con el task:\n" << t.say() << endl << endl;
 	#endif
 	workerQueues[dest].push(t);
 }

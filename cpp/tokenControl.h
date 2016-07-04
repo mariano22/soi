@@ -11,7 +11,6 @@
 #include "ids.h"
 
 #define dprint(v) cerr << #v"=" << v << endl //;)
-#define TOKEN_MICROSECONDS_TIME 5000000
 using namespace std;
 
 class token {
@@ -41,7 +40,7 @@ class tokenControl {
 	private:
 		token t;
 		bool valid;
-		clock_t trec;
+		struct timespec trec;
 };
 
 #endif

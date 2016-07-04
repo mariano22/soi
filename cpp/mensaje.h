@@ -28,11 +28,12 @@ class mensaje {
 
 		void addArg(const string& arg);		
 		string say() const;
+		
 	private:
 		void setHeader(const string& h);
-
-		string header;
 		vector<string> args;
+		string header;
+		
 		
 };
 

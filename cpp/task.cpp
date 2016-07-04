@@ -256,7 +256,7 @@ string task::say() const {
 	forall(it,m) { string s = it->fst;
 		r << "(" + s + "," ;
 		if (s=="fileName") {
-			r  << (string*)it->snd;
+			r  << *(string*)it->snd;
 		} else if (s=="idGlobal") {
 			r << "(" << ((GlobalId*)it->snd)->fst << "," << ((GlobalId*)it->snd)->snd << ") ";
 		} else if (s=="GlobalFd") {

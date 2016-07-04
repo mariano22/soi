@@ -28,6 +28,9 @@ localConections *workerConections = NULL;
 int workerCant;
     
 void procToken(WorkerScope* myScope) {
+	/*#ifdef DEBUG_FLAG
+	cout << "MAIN_WORKER: Procesando TOKEN en " << myScope->MyIdsManage.myId() << " Mostrando las colas: " << myScope->MytokenQueues.say() << endl;
+	#endif*/
 	token Token = myScope->MytokenControl.getT();
 	vector< pair<string,WorkerId> > ListaAltasOld = Token.getListaAltas();
 	vector< pair<string,WorkerId> > ListaBajasOld = Token.getListaBajas();
@@ -41,6 +44,8 @@ void procToken(WorkerScope* myScope) {
 	forall(it,MyDeletes) ListaBajasNew.push_back( pair<string,WorkerId>(*it, myScope->MyIdsManage.myId()) );
 	vector< pair<string,ClientId> >  MyCreateRequests = myScope->MytokenQueues.getCreates();
 	
+	
+
 	vector< pair<string,ClientId> >  MyCreateRequestsOk;
 	forall(it, MyCreateRequests) {
 		bool f_is = false;
@@ -75,16 +80,15 @@ void* mainWorker(void *pid) {
 	myScope->MysyncQueues = &workerQueues[id];
 	myScope->MylocalConections = &workerConections[id];
 	
-	#ifdef DEBUG_FLAG
+	/*#ifdef DEBUG_FLAG
 	cout << "MAIN_WORKER: Worker " << id << " listo para operar\n";
-	#endif
+	#endif*/
 	
-	//~ if (!id) myScope->MytokenControl.recvT(token());
+	if (!id) myScope->MytokenControl.recvT(token());
 	while(true) {
 		
 		#ifdef DEBUG_FLAG
 		cout << "MAIN_WORKER: Estructura del worker " << id << ":\n" << myScope->say() << endl << endl;
-		
 		#endif
 		
 		task t;
@@ -94,6 +98,9 @@ void* mainWorker(void *pid) {
 			#endif
 			procTask(myScope,t);
 		}
+		/*#ifdef DEBUG_FLAG
+		cout << "MAIN_WORKER: Tick " << id << " mustProc: " << myScope->MytokenControl.mustProc()  << endl;
+		#endif*/
 		if (myScope->MytokenControl.mustProc()) {
 			procToken(myScope);
 		}

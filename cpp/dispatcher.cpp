@@ -1,5 +1,5 @@
 #include "dispatcher.h"
-#define DISPATCHER_EXTERN_PORT 8085
+#define DISPATCHER_EXTERN_PORT 8080
 using namespace std;
 
 void *clientSlave(void *arg) {
@@ -10,9 +10,9 @@ void *clientSlave(void *arg) {
 	syncQueues<mensaje> *myInbox = new syncQueues<mensaje>;
 	workerConections[wId].newC(myId,myInbox);
 	
-	#ifdef DEBUG_FLAG
+	/*#ifdef DEBUG_FLAG
 	cout << "DISPATCHER: Nuevo Cliente #" << myId << " asosciado a " << wId << endl;
-	#endif
+	#endif*/
 	
 	bool exit_flag;
 	do {
@@ -29,9 +29,9 @@ void *clientSlave(void *arg) {
 		else {	
 			workerQueues[wId].push(result.first);
 			
-			#ifdef DEBUG_FLAG
+			/*#ifdef DEBUG_FLAG
 			cout << "DISPATCHER: task enviado, esperando respuesta " << myId << endl;
-			#endif
+			#endif*/
 			
 			mensaje respuesta; 
 			myInbox->recv(respuesta,-1);
@@ -42,9 +42,9 @@ void *clientSlave(void *arg) {
 		
   } while (!exit_flag);
   
-	#ifdef DEBUG_FLAG
+	/*#ifdef DEBUG_FLAG
 	cout << "DISPATCHER: cliente terminando " << myId << endl;
-	#endif
+	#endif*/
   
   close(conn_s);
   workerConections[wId].delC(myId);
@@ -67,9 +67,9 @@ void launchDispatcher()
   assert( bind(list_s, (struct sockaddr *) &servaddr, sizeof(servaddr)) >= 0 );
   assert( listen(list_s, 10) >= 0 );
   
-  #ifdef DEBUG_FLAG
+  /*#ifdef DEBUG_FLAG
   cout << "DISPATCHER: listo para recibir conexiones en " << DISPATCHER_EXTERN_PORT << endl;
-  #endif
+  #endif*/
 
   for (int cId=0;;cId++) {
     assert( (conn_s = accept(list_s, NULL, NULL) ) >= 0 );

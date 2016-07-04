@@ -20,7 +20,12 @@ typedef pair<int,int> ii;
 const int MAXN=100100;
 int n;
 
-void responderClienteRemoto( GlobalId Idg,mensaje Msj){}
+void responderClienteRemoto( GlobalId Idg,mensaje Msj){
+	WorkerId W = idsManage::globalIdToWorker(Idg);
+	ClientId C = idsManage::globalIdToClient(Idg);
+	task T = task::crear_workerSay(C, Msj);
+	enviarWorker(W,T);
+}
 
 void caseUserCon(WorkerScope *who,task& t){
 				ClientId c = t.getCliente();
@@ -28,9 +33,8 @@ void caseUserCon(WorkerScope *who,task& t){
 }
 
 void caseUserLsd(WorkerScope *who,task& t){
-			globalFiles gl = globalFiles();
 			mensaje l = mensaje::mOk();
-			vector<string> arch = gl.archivosActuales();
+			vector<string> arch = who->MyglobalFiles.archivosActuales();
 			forall (it, arch ){ l.addArg(*it);  };
 			ClientId cID = t.getCliente();
 			responderCliente(cID,l, who);
@@ -107,14 +111,12 @@ void caseUserWrite(WorkerScope *who,task& t){
 	ClientId cID = t.getCliente();
 	GlobalFd gFd = t.getGlobalFd();
 	GlobalId idG = idsManage::makeIdGlobal(who->MyIdsManage.myId(),cID);
-	bool b=false;
-	forall(it, (who->MyopenedFiles.globalFdList(cID))){ 
-		b = b || (*it==gFd);
-	}
-	string txt;
-	if (b){
+	vector<GlobalFd> gFdS = (who->MyopenedFiles.globalFdList(cID));
+
+	if ( find(gFdS.begin(), gFdS.end(), gFd) != gFdS.end() ){
 		int sizeF = t.getSizeTxt();
 		int sizeA = (t.getStrTxt()).size();
+		string txt;
 		if(sizeF<sizeA){
 			txt = t.getStrTxt(); 
 		}else{
@@ -152,12 +154,9 @@ void caseUserClose(WorkerScope *who,task& t){
 	ClientId cID = t.getCliente();
 	GlobalFd gFd = t.getGlobalFd();
 	GlobalId idG = idsManage::makeIdGlobal(who->MyIdsManage.myId(),cID);
-	bool b=false;
-	forall(it, (who->MyopenedFiles.globalFdList(cID))){ 
-		b = b || (*it==gFd);
-	}
-	string txt;
-	if (b){
+	vector<GlobalFd> gFdS = (who->MyopenedFiles.globalFdList(cID));
+	
+	if ( find(gFdS.begin(), gFdS.end(), gFd) != gFdS.end() ){
 		WorkerId w = idsManage::globalFdToWorker(gFd);
 		task order = task::crear_workerClose(gFd, idG);
 		comunic:enviarWorker(w,order);
@@ -298,6 +297,7 @@ void caseWorkerCloseSucc(WorkerScope *who,task& t){
 }
 void caseWorkerToken(WorkerScope *who,task& t){
 	token tk = t.getToken();
+	who->MytokenControl.recvT(tk);
 }
 
 	

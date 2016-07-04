@@ -3,6 +3,7 @@
 #define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
 #define fst first
 #define snd second
+#define TOKEN_MILLISECONDS_TIME 5000
 
 vector< pair<string,WorkerId> > token::getListaAltas() {
 	vector< pair<string,WorkerId> > res = lc;
@@ -24,12 +25,12 @@ token::token(const vector< pair<string,WorkerId> >& lcp, vector< pair<string,Wor
 
 
 
-int tokenControl::tickTime() { return TOKEN_MICROSECONDS_TIME; }
+int tokenControl::tickTime() { return TOKEN_MILLISECONDS_TIME; }
 
 void tokenControl::recvT(const token& nt) {
 	assert(!valid);
 	valid=true;
-	trec=clock();
+	clock_gettime(CLOCK_MONOTONIC, &trec);
 	t=nt;
 }
 token tokenControl::getT() {
@@ -39,8 +40,12 @@ token tokenControl::getT() {
 }
 bool tokenControl::mustProc() {
 	if (!valid) return false;
-	double seconds = double(clock()-trec) / CLOCKS_PER_SEC;
-	return seconds > double(TOKEN_MICROSECONDS_TIME) / 1000000. ;
+	struct timespec actual; clock_gettime(CLOCK_MONOTONIC, &actual);
+	double seconds = (actual.tv_sec - trec.tv_sec);
+	seconds += (actual.tv_nsec - trec.tv_nsec) / 1000000000.0;
+	//~ DEBUG
+	//~ cout << "diff " << seconds  << endl;
+	return seconds > double(TOKEN_MILLISECONDS_TIME) / 1000. ;
 }
 
 tokenControl::tokenControl() { valid=false; }

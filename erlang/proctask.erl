@@ -219,6 +219,7 @@ proc( workerClose, Task ) ->
     case fdmanage:getOwner(Fd)==Idg of
          false -> responderClienteRemoto(Idg, mensaje:permisoDenegado());
          true  -> F     = fdmanage:getNameFile(Fd),
+                  realfs:close(fdmanage:getHandle(Fd)),
                   fdmanage:unregisterFd(Fd),
                   io:format("dbg: ~p ~p~n",[Fd,F]), % DEBUG
                   localfiles:close(F),
