@@ -26,9 +26,47 @@ typedef pair<int,int> ii;
 syncQueues<task> *workerQueues = NULL;
 localConections *workerConections = NULL;
 int workerCant;
-
+    
 void procToken(WorkerScope* myScope) {
-	assert(false); /* TODO */
+	token Token = myScope->MytokenControl.getT();
+	vector< pair<string,WorkerId> > ListaAltasOld = Token.getListaAltas();
+	vector< pair<string,WorkerId> > ListaBajasOld = Token.getListaBajas();
+
+	vector< pair<string,WorkerId> > ListaAltas, ListaBajas;
+	forall(it, ListaAltasOld) if ( it->second != myScope->MyIdsManage.myId() ) ListaAltas.push_back(*it);
+	forall(it, ListaBajasOld) if ( it->second != myScope->MyIdsManage.myId() ) ListaBajas.push_back(*it);
+	
+	vector< pair<string,WorkerId> > ListaBajasNew = ListaBajas;
+	vector< string > MyDeletes = myScope->MytokenQueues.getDeletes();
+	forall(it,MyDeletes) ListaBajasNew.push_back( pair<string,WorkerId>(*it, myScope->MyIdsManage.myId()) );
+	vector< pair<string,ClientId> >  MyCreateRequests = myScope->MytokenQueues.getCreates();
+	
+	vector< pair<string,ClientId> >  MyCreateRequestsOk;
+	forall(it, MyCreateRequests) {
+		bool f_is = false;
+		forall(jt,ListaAltas) f_is = f_is || jt->first == it->first;
+		if ( f_is ) 
+			responderCliente(it->second, mensaje::archivoExistente(), myScope);
+		else {
+			responderCliente(it->second, mensaje::mOk(), myScope);
+			myScope->MylocalFiles.create(it->first);
+			createf(it->first);
+			MyCreateRequestsOk.push_back(*it);
+		}
+	}
+	
+	vector< pair<string,WorkerId> > ListaAltasNew = ListaAltas;
+	forall(it,MyCreateRequestsOk) 
+		ListaAltasNew.push_back( pair<string,WorkerId>(it->first, myScope->MyIdsManage.myId()) );
+
+    forall(it,ListaAltasNew) 
+		myScope->MyglobalFiles.alta(it->first, it->second);
+	forall(it,ListaBajasNew)
+		myScope->MyglobalFiles.baja(it->first);
+
+    token NewToken(ListaAltasNew, ListaBajasNew);
+    task Orden = task::crear_workerToken(NewToken);
+    enviarWorker( myScope->MyIdsManage.nextWorkerId(), Orden );
 }
 
 void* mainWorker(void *pid) { 
