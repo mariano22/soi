@@ -7,5 +7,5 @@
 #include "comunic.h"
 #include "ids.h"
 using namespace std;
-void procTask(WorkerScope *who,const task& t);
+void procTask(WorkerScope *who,task& t);
 #endif

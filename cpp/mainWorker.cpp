@@ -25,6 +25,7 @@ typedef pair<int,int> ii;
 
 syncQueues<task> *workerQueues = NULL;
 localConections *workerConections = NULL;
+int workerCant;
 
 void procToken(WorkerScope* myScope) {
 	assert(false); /* TODO */
