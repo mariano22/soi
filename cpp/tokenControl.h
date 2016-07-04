@@ -11,7 +11,7 @@
 #include "ids.h"
 
 #define dprint(v) cerr << #v"=" << v << endl //;)
-#define TOKEN_MICROSECONDS_TIME 1000
+#define TOKEN_MICROSECONDS_TIME 5000000
 using namespace std;
 
 class token {
@@ -20,6 +20,9 @@ class token {
 		vector< pair<string,WorkerId> > getListaBajas();
 		token(const vector< pair<string,WorkerId> >& lcp, vector< pair<string,WorkerId> >& ldp);
 		token();
+		#ifdef DEBUG_FLAG
+		string say();
+		#endif
 	private:
 		vector< pair<string,WorkerId> >  lc,ld;
 };

@@ -15,6 +15,9 @@ using namespace std;
 
 enum taskName { userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, userWrite, userRead, userClose, userBye, userCon, workerDelete, workerOpenRead, workerWrite, workerRead, workerOpenWrite, workerSay, workerOpenSucc, workerClose, workerCloseBye, workerCloseSucc, workerToken } ;
 
+#ifdef DEBUG_FLAG
+extern string taskNamePrint[];
+#endif
 
 void myDelete(const string& s, void * ptr) ;
 
@@ -52,6 +55,10 @@ class task {
 		static task crear_workerSay(const ClientId& cId, const mensaje& m);
 		static task crear_workerToken(const token& t);
 		static pair<task,bool> fromUserData(const vector<string>& parsed_data, const ClientId& cId);
+		
+		#ifdef DEBUG_FLAG
+		string say();
+		#endif
 	private:
 		taskName tN;
 		map<string,void*> m;
