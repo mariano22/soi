@@ -1,5 +1,8 @@
 #include "task.h"
-
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 void myDelete(const string& s, void * ptr) {
 	if (s=="fileName") {
@@ -245,3 +248,33 @@ pair<task,bool> task::fromUserData(const vector<string>& parsed_data, const Clie
 	r.setCliente(cId);
 	return make_pair(r,true);
 }
+#ifdef DEBUG_FLAG
+string taskNamePrint[] = { "userLsd", "userDelete", "userCreate", "userOpenRead", "userOpenWrite", "userWrite", "userRead", "userClose", "userBye", "userCon", "workerDelete", "workerOpenRead", "workerWrite", "workerRead", "workerOpenWrite", "workerSay", "workerOpenSucc", "workerClose", "workerCloseBye", "workerCloseSucc", "workerToken" } ;
+string task::say() const {
+	stringstream r;
+	r << "task "+ taskNamePrint[tN] + " { " ;
+	forall(it,m) { string s = it->fst;
+		r << "(" + s + "," ;
+		if (s=="fileName") {
+			r  << (string*)it->snd;
+		} else if (s=="idGlobal") {
+			r << "(" << ((GlobalId*)it->snd)->fst << "," << ((GlobalId*)it->snd)->snd << ") ";
+		} else if (s=="GlobalFd") {
+			r << *(GlobalFd*)it->snd;
+		} else if (s=="cliente") {
+			r << *(ClientId*)it->snd;
+		} else if (s=="sizeTxt") {
+			r << *(int*)it->snd;
+		} else if (s=="strTxt") {
+			r << *(string*)it->snd;
+		} else if (s=="mensaje") {
+			r << ((mensaje *)it->snd)->say();
+		} else if (s=="token") {
+			r << ((token *)it->snd)->say();
+		} else assert(false);
+		r << ") // " ;
+	}
+	r << "}";
+	return r.str();
+}
+#endif

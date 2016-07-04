@@ -1,4 +1,8 @@
 #include "fdManage.h"
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 RealFSHandle fdManage::getHandle(const LocalFd& fd) {
 	map<LocalFd,fd_info>::iterator it = m.find(fd);
@@ -26,4 +30,13 @@ LocalFd fdManage::registerFd(const GlobalId& g,const string& s,const RealFSHandl
 }
 
 fdManage::fdManage() : counter(0) {}
+
+#ifdef DEBUG_FLAG
+string fdManage::say() const {
+	stringstream r;
+	forall(it,m) r << "(" <<it->fst << "," << it->snd.n << "," << it->snd.g.fst << "," << it->snd.g.snd  << ") ";
+	r << endl;
+	return r.str();
+}
+#endif
 

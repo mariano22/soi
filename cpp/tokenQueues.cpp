@@ -1,4 +1,8 @@
 #include "tokenQueues.h"
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 
 void tokenQueues::newCreate(const string& fileName, ClientId cid) {
@@ -27,3 +31,14 @@ bool tokenQueues::isInCreate(string fileName) {
 	return c.find(fileName) != c.end();
 }
 
+#ifdef DEBUG_FLAG
+string tokenQueues::say() {
+	stringstream r;
+	r << "Deletes pendientes: " ;
+	forall(it,d) r << *it <<"," ;
+	r << endl << "Altas pendientes: ";
+	forall(it,c) r << "(" << it->fst << " , " << it->snd << ") ; " ;
+	r << endl;
+	return r.str();
+}
+#endif

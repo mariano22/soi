@@ -16,6 +16,9 @@ class localFiles {
 		void openR(const string& fileName);
 		void openW(const string& fileName);
 		void close(const string& fileName);
+		#ifdef DEBUG_FLAG
+		string say() const;
+		#endif
 	private://ver como importar/exportar
 		struct status_info {
 			int lectores,escritores;

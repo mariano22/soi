@@ -7,7 +7,7 @@ bool getLineSocket(int sc, string &r) {
 			close(sc);
 			return true;
 		}
-		r.push_back(bf);
+		if (bf!='\n' && bf!='\0') r.push_back(bf);
 	} while (bf!='\n' && bf!='\0');
 	return false;
 }

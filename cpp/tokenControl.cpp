@@ -1,4 +1,8 @@
 #include "tokenControl.h"
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 vector< pair<string,WorkerId> > token::getListaAltas() {
 	vector< pair<string,WorkerId> > res = lc;
@@ -41,4 +45,27 @@ bool tokenControl::mustProc() {
 
 tokenControl::tokenControl() { valid=false; }
 
+#ifdef DEBUG_FLAG
+string token::say() {
+	stringstream r;
+	r << "Token:" << endl << "Lista de altas: " ;
+	forall(it,lc) r << "(" << it->fst << " , " << it->snd << ") ; " ;
+	r << endl << "Lista de bajas: ";
+	forall(it,ld) r << "(" << it->fst << " , " << it->snd << ") ; " ;
+	r << endl;
+	
+	return r.str();
+}
+#endif
+
+#ifdef DEBUG_FLAG
+string tokenControl::say()  {
+	stringstream r;
+	if (!valid) r << "token invalid";
+	else {
+		r <<"token: " << t.say();
+	}
+	return r.str();
+}
+#endif
 
