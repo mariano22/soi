@@ -20,6 +20,8 @@ typedef pair<int,int> ii;
 const int MAXN=100100;
 int n;
 
+void responderClienteRemoto( GlobalId Idg,mensaje Msj){}
+
 void caseUserCon(WorkerScope *who,task& t){
 				ClientId c = t.getCliente();
 				responderCliente(c,mensaje::coneccionEstablecida(c),who);
@@ -119,15 +121,107 @@ void caseUserWrite(WorkerScope *who,task& t){
 			txt = t.getStrTxt().substr(0,sizeF);
 		}
 		WorkerId w = idsManage::globalFdToWorker(gFd);
-		task order = task::crear_workerWrite(txt, idG);
+		task order = task::crear_workerWrite(txt,gFd, idG);
 		comunic:enviarWorker(w,order);
 	}else{
 		responderCliente(cID, mensaje::permisoDenegado(), who);
 	}
-	
-	
 }
 	
+
+void caseUserRead(WorkerScope *who,task& t){
+	ClientId cID = t.getCliente();
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = idsManage::makeIdGlobal(who->MyIdsManage.myId(),cID);
+	int sizeF = t.getSizeTxt();
+	bool b=false;
+	forall(it, (who->MyopenedFiles.globalFdList(cID))){ 
+		b = b || (*it==gFd);
+	}
+	string txt;
+	if (b){
+		WorkerId w = idsManage::globalFdToWorker(gFd);
+		task order = task::crear_workerRead(sizeF,gFd, idG);
+		comunic:enviarWorker(w,order);
+	}else{
+		responderCliente(cID, mensaje::permisoDenegado(), who);
+	}
+}
+
+void caseUserClose(WorkerScope *who,task& t){
+	ClientId cID = t.getCliente();
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = idsManage::makeIdGlobal(who->MyIdsManage.myId(),cID);
+	bool b=false;
+	forall(it, (who->MyopenedFiles.globalFdList(cID))){ 
+		b = b || (*it==gFd);
+	}
+	string txt;
+	if (b){
+		WorkerId w = idsManage::globalFdToWorker(gFd);
+		task order = task::crear_workerClose(gFd, idG);
+		comunic:enviarWorker(w,order);
+	}else{
+		responderCliente(cID, mensaje::permisoDenegado(), who);
+	}
+}
+
+void caseWorkerDelete(WorkerScope *who,task& t){
+	string name  = t.getFileName();
+	GlobalId idG = t.getIdGlobal();
+	fileStatus state = who->MylocalFiles.status(name);
+	if (state == noFile){
+		responderClienteRemoto(idG,mensaje::archivoNoExiste());
+	}else if (state == unused){
+		who->MytokenQueues.newDelete(name);
+		responderClienteRemoto(idG, mensaje::archivoBorrado());
+		who->MylocalFiles.deletef(name);
+		deletef(name);
+	}else{
+		responderClienteRemoto(idG, mensaje::archivoOcupado());
+	}
+}
+void caseWorkerOpenRead(WorkerScope *who,task& t){
+	/*string name  = t.getFileName();
+	GlobalId idG = t.getIdGlobal();
+	fileStatus state = who->MyfdManage.status(name);
+	
+	if (state == noFile){
+		responderClienteRemoto(idG,mensaje::archivoNoExiste());
+	}else if (state == writing){
+		responderClienteRemoto(idG, mensaje::archivoOcupado());
+	}else{
+		RealFSHandle handle = openr(name);
+	}*/
+}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+//void caseWorker(WorkerScope *who,task& t){
+
+//}
+
 	
 void procTask(WorkerScope *who,task& t) {
 	switch (t.getTaskName()) {
@@ -153,15 +247,19 @@ void procTask(WorkerScope *who,task& t) {
 			caseUserWrite(who,t);
 		break;
 		case userRead:
+			caseUserRead(who,t);
 		break;
 		case userClose:
+			caseUserClose(who,t);
 		break;
 		case userBye:
 			caseUserBye(who,t);
 		break;
 		case workerDelete:
+			caseWorkerDelete(who,t);
 		break;
 		case workerOpenRead:
+			caseWorkerOpenRead(who,t);
 		break;
 		case workerWrite:
 		break;
