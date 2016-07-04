@@ -273,6 +273,8 @@ void caseWorkerClose(WorkerScope *who,task& t){
 	if (who->MyfdManage.getOwner(fd) != idG){
 		responderClienteRemoto(idG,mensaje::permisoDenegado());
 	}else{
+		RealFSHandle handle = who->MyfdManage.getHandle(fd);
+		close(handle);
 		string file = who->MyfdManage.getNameFile(fd);
 		who->MyfdManage.unregisterFd(fd);
 		who->MylocalFiles.close(file);
