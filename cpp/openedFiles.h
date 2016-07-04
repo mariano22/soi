@@ -12,6 +12,9 @@ class openedFiles {
 		vector<GlobalFd> globalFdList(const ClientId& cId);
 		void registerClose(const GlobalFd& gFd);
 		void registerOpen(const GlobalFd& gFd, const ClientId& cId);
+		#ifdef DEBUG_FLAG
+		string say() const;
+		#endif
 	private:
 		map< GlobalFd,ClientId > m;
 };

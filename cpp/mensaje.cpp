@@ -85,7 +85,7 @@ mensaje mensaje::coneccionEstablecida(const ClientId& cId) {
 	return r;
 }
 
-string mensaje::say() {
+string mensaje::say() const {
 	string res = header + (int(args.size()) ? " " : "\n");
 	for(int i=0 ; i < int(args.size()) ; i++) {
 		res = res + args[i] + ( i==int(args.size())-1 ? "\n" : " " );

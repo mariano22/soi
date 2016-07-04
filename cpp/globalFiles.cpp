@@ -1,4 +1,8 @@
 #include "globalFiles.h"
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 vector<string> globalFiles::archivosActuales() {
 	vector<string> result;
@@ -19,5 +23,12 @@ void globalFiles::alta(const string& fileName, WorkerId id) {
 	m[fileName] = id;
 }
 
-		//map< string,WorkerId > m;
+#ifdef DEBUG_FLAG
+string globalFiles::say() const {
+	stringstream r;
+	forall(it,m) r << "(" <<it->fst << "," << it->snd << ") ";
+	r << endl;
+	return r.str();
+}
+#endif
 

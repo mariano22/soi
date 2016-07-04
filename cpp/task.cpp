@@ -250,7 +250,7 @@ pair<task,bool> task::fromUserData(const vector<string>& parsed_data, const Clie
 }
 #ifdef DEBUG_FLAG
 string taskNamePrint[] = { "userLsd", "userDelete", "userCreate", "userOpenRead", "userOpenWrite", "userWrite", "userRead", "userClose", "userBye", "userCon", "workerDelete", "workerOpenRead", "workerWrite", "workerRead", "workerOpenWrite", "workerSay", "workerOpenSucc", "workerClose", "workerCloseBye", "workerCloseSucc", "workerToken" } ;
-string task::say() {
+string task::say() const {
 	stringstream r;
 	r << "task "+ taskNamePrint[tN] + " { " ;
 	forall(it,m) { string s = it->fst;

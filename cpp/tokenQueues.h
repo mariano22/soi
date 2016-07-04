@@ -18,6 +18,9 @@ class tokenQueues {
 		vector< pair<string,ClientId> > getCreates();
 		vector< string > getDeletes();
 		bool isInCreate(string fileName);
+		#ifdef DEBUG_FLAG
+		string say();
+		#endif
 	private:
 		map< string,ClientId > c;
 		set<string> d;

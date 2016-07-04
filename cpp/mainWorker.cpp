@@ -81,6 +81,12 @@ void* mainWorker(void *pid) {
 	
 	//~ if (!id) myScope->MytokenControl.recvT(token());
 	while(true) {
+		
+		#ifdef DEBUG_FLAG
+		cout << "MAIN_WORKER: Estructura del worker " << id << ":\n" << myScope->say() << endl << endl;
+		
+		#endif
+		
 		task t;
 		if ( myScope->MysyncQueues->recv(t,myScope->MytokenControl.tickTime()) ) {
 			#ifdef DEBUG_FLAG

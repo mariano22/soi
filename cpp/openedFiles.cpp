@@ -1,4 +1,8 @@
 #include "openedFiles.h"
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 vector<GlobalFd> openedFiles::globalFdList(const ClientId& cId) {
 	vector<GlobalFd> result;
@@ -18,8 +22,12 @@ void openedFiles::registerOpen(const GlobalFd& gFd, const ClientId& cId) {
 	m[gFd] = cId;
 }
 
-
-
-
-map< GlobalFd,ClientId > m;//QUE ONDA? ¿=?
+#ifdef DEBUG_FLAG
+string openedFiles::say() const {
+	stringstream r;
+	forall(it,m) r << "(" <<it->fst << "," << it->snd << ") ";
+	r << endl;
+	return r.str();
+}
+#endif
 

@@ -27,7 +27,7 @@ class mensaje {
 		static mensaje coneccionEstablecida(const ClientId& cId);
 
 		void addArg(const string& arg);		
-		string say();
+		string say() const;
 	private:
 		void setHeader(const string& h);
 

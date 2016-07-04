@@ -58,3 +58,14 @@ string token::say() {
 }
 #endif
 
+#ifdef DEBUG_FLAG
+string tokenControl::say()  {
+	stringstream r;
+	if (!valid) r << "token invalid";
+	else {
+		r <<"token: " << t.say();
+	}
+	return r.str();
+}
+#endif
+

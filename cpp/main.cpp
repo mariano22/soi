@@ -14,7 +14,7 @@
 using namespace std;
 
 int main() {
-	workerCant = 4 ;
+	workerCant = 2 ;
 	
     pthread_t *wfs = (pthread_t *) malloc(workerCant*sizeof(pthread_t));
     int *ids = new int[workerCant];

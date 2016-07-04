@@ -1,4 +1,8 @@
 #include "localFiles.h"
+#include <sstream>
+#define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
+#define fst first
+#define snd second
 
 fileStatus localFiles::status(const string& fileName) {
 	map<string,status_info>::iterator it = m.find(fileName);
@@ -36,9 +40,17 @@ void localFiles::close(const string& fileName) {
 	else it->second.escritores--;
 }
 
-	/*	struct status_info {
-			int lectores,escritores;
-			status_info(int lectores=0,int escritores=0) : lectores(lectores), escritores(escritores) {}
-		};
-		map< string,status_info > m;
-*/
+#ifdef DEBUG_FLAG
+string localFiles::say() const {
+	stringstream r;
+	forall(it,m) { 
+		r << "(" <<it->fst << "," ;
+		if (it->snd.escritores) r << "escribiendo";
+		else if (it->snd.lectores) r << it->snd.lectores <<" lectores";
+		else r << "libre";
+		r<< ") ";
+	}
+	r << endl;
+	return r.str();
+}
+#endif

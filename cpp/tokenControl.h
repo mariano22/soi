@@ -35,6 +35,9 @@ class tokenControl {
 		token getT();
 		bool mustProc();
 		tokenControl();
+		#ifdef DEBUG_FLAG
+		string say();
+		#endif
 	private:
 		token t;
 		bool valid;

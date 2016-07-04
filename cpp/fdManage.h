@@ -18,6 +18,9 @@ class fdManage {
 		void unregisterFd(const LocalFd& fd);
 		LocalFd registerFd(const GlobalId& g,const string& s,const RealFSHandle& h);
 		fdManage();
+		#ifdef DEBUG_FLAG
+		string say() const;
+		#endif
 	private:/*ver como hacer en el .cpp*/
 		struct fd_info {
 			string n;

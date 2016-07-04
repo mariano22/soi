@@ -57,7 +57,7 @@ class task {
 		static pair<task,bool> fromUserData(const vector<string>& parsed_data, const ClientId& cId);
 		
 		#ifdef DEBUG_FLAG
-		string say();
+		string say() const;
 		#endif
 	private:
 		taskName tN;

@@ -15,6 +15,9 @@ class globalFiles {
 		WorkerId getOwner(const string& fileName);
 		void baja(const string& fileName);
 		void alta(const string& fileName, WorkerId id);
+		#ifdef DEBUG_FLAG
+		string say() const;
+		#endif
 	private:
 		map< string,WorkerId > m;
 };
