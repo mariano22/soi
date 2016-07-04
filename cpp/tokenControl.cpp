@@ -34,7 +34,7 @@ token tokenControl::getT() {
 	return t;
 }
 bool tokenControl::mustProc() {
-	assert(valid);
+	if (!valid) return false;
 	double seconds = double(clock()-trec) / CLOCKS_PER_SEC;
 	return seconds > double(TOKEN_MICROSECONDS_TIME) / 1000000. ;
 }

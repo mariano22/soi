@@ -44,7 +44,7 @@ class task {
 		static task crear_workerOpenRead(const string& nameFile,const GlobalId& IdG);
 		static task crear_workerOpenWrite(const string& nameFile,const GlobalId& IdG);
 		static task crear_workerOpenSucc(const GlobalFd& gFd, const ClientId& cId);
-		static task crear_workerWrite(const string& nameFile, const GlobalFd& gFd, const GlobalId& IdG);
+		static task crear_workerWrite(const string& txt, const GlobalFd& gFd, const GlobalId& IdG);
 		static task crear_workerRead(const int& Sz,const GlobalFd& gFd, const GlobalId& gId);
 		static task crear_workerClose(const GlobalFd& gFd, const GlobalId& gId);
 		static task crear_workerCloseSucc(const GlobalFd& gFd, const GlobalId& gId);

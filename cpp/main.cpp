@@ -16,8 +16,6 @@ using namespace std;
 int main() {
 	workerCant = 4 ;
 	
-	launchDispatcher();
-	
     pthread_t *wfs = (pthread_t *) malloc(workerCant*sizeof(pthread_t));
     int *ids = new int[workerCant];
     workerQueues = new syncQueues<task>[workerCant];
@@ -26,6 +24,9 @@ int main() {
 		ids[i]=i;
 		pthread_create(&wfs[i], 0, mainWorker, &ids[i]); 
 	}
+	
+	launchDispatcher();
+	
 	for(int i=0 ; i < workerCant ; i++) 
 		pthread_join(wfs[i],NULL);
 		

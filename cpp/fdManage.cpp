@@ -19,17 +19,11 @@ void fdManage::unregisterFd(const LocalFd& fd) {
 	assert( m.find(fd) != m.end() );
 	m.erase(fd);
 }
-void fdManage::registerFd(const LocalFd& fd,const GlobalId& g,const string& s,const RealFSHandle& h) {
-	assert( m.find(fd) == m.end() );
-	m[fd]=fd_info(s,g,h);
+LocalFd fdManage::registerFd(const GlobalId& g,const string& s,const RealFSHandle& h) {
+	assert( m.find(counter) == m.end() );
+	m[counter]=fd_info(s,g,h);
+	return counter++;
 }
-/*
-struct fd_info {
-	string n;
-	GlobalId g;
-	RealFSHandle h;
-	fd_info() {}
-	fd_info(const string& n,const GlobalId& g,const RealFSHandle& h) : n(n), g(g), h(h) {}
-};
-map< LocalFd, fd_info > m;
-*/
+
+fdManage::fdManage() : counter(0) {}
+

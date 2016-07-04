@@ -16,7 +16,8 @@ class fdManage {
 		GlobalId getOwner(const LocalFd& fd);
 		string getNameFile(const LocalFd& fd);
 		void unregisterFd(const LocalFd& fd);
-		void registerFd(const LocalFd& fd,const GlobalId& g,const string& s,const RealFSHandle& h);
+		LocalFd registerFd(const GlobalId& g,const string& s,const RealFSHandle& h);
+		fdManage();
 	private:/*ver como hacer en el .cpp*/
 		struct fd_info {
 			string n;
@@ -26,6 +27,7 @@ class fdManage {
 			fd_info(const string& n,const GlobalId& g,const RealFSHandle& h) : n(n), g(g), h(h) {}
 		};
 		map< LocalFd, fd_info > m;
+		int counter;
 };
 
 

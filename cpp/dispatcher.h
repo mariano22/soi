@@ -14,7 +14,6 @@
 #include "localConections.h"
 #include "sockaux.h"
 #include "parser.h"
-#define DISPATCHER_EXTERN_PORT 8080
 using namespace std;
 
 void launchDispatcher();

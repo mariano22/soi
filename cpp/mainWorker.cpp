@@ -75,11 +75,16 @@ void* mainWorker(void *pid) {
 	myScope->MysyncQueues = &workerQueues[id];
 	myScope->MylocalConections = &workerConections[id];
 	
-	if (!id) myScope->MytokenControl.recvT(token());
+	//~ if (!id) myScope->MytokenControl.recvT(token());
 	while(true) {
 		task t;
-		myScope->MysyncQueues->recv(t,myScope->MytokenControl.tickTime());
-		procTask(myScope,t);
+		
+		
+		
+		if ( myScope->MysyncQueues->recv(t,myScope->MytokenControl.tickTime()) ) {
+			cout << "task: " <<t.getTaskName() << endl;
+			procTask(myScope,t);
+		}
 		if (myScope->MytokenControl.mustProc()) {
 			procToken(myScope);
 		}

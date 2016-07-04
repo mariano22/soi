@@ -1,13 +1,19 @@
 #include "dispatcher.h"
+#define DISPATCHER_EXTERN_PORT 8085
 using namespace std;
 
 void *clientSlave(void *arg) {
+	
+	cout << "asdasd " << endl;
+	
 	int conn_s = ((pair<int,int> *)arg)->first;
 	int myId = ((pair<int,int> *)arg)->second;
 	delete ((pair<int,int> *)arg);
 	int wId = rand() % workerCant;
 	syncQueues<mensaje> *myInbox = new syncQueues<mensaje>;
 	workerConections[wId].newC(myId,myInbox);
+	
+	cout << "Nuevo Cliente " << myId << " asosciado a " << wId << endl;
 	
 	bool exit_flag;
 	do {

@@ -147,15 +147,17 @@ task task::crear_workerOpenSucc(const GlobalFd& gFd, const ClientId& cId) {
 	return r;
 }
 
-task task::crear_workerWrite(const string& nameFile,const GlobalId& IdG) {
+task task::crear_workerWrite(const string& txt,const GlobalFd& gFd ,const GlobalId& IdG) {
 	task r; r.setTaskName(workerWrite);
-	r.setFileName(nameFile);
+	r.setStrTxt(txt);
+	r.setGlobalFd(gFd);
 	r.setIdGlobal(IdG);
 	return r;
 }
 
 task task::crear_workerRead(const int& Sz,const GlobalFd& gFd, const GlobalId& gId) {
 	task r; r.setTaskName(workerRead);
+	r.setSizeTxt(Sz);
 	r.setGlobalFd(gFd);
 	r.setIdGlobal(gId);
 	return r;
