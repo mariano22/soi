@@ -182,9 +182,9 @@ void caseWorkerDelete(WorkerScope *who,task& t){
 	}
 }
 void caseWorkerOpenRead(WorkerScope *who,task& t){
-	/*string name  = t.getFileName();
+	string name  = t.getFileName();
 	GlobalId idG = t.getIdGlobal();
-	fileStatus state = who->MyfdManage.status(name);
+	fileStatus state = who->MylocalFiles.status(name);
 	
 	if (state == noFile){
 		responderClienteRemoto(idG,mensaje::archivoNoExiste());
@@ -192,35 +192,113 @@ void caseWorkerOpenRead(WorkerScope *who,task& t){
 		responderClienteRemoto(idG, mensaje::archivoOcupado());
 	}else{
 		RealFSHandle handle = openr(name);
-	}*/
+		LocalFd localFd = who->MyfdManage.registerFd(idG, name, handle);
+		who->MylocalFiles.openR (name);
+		WorkerId wID = who->MyIdsManage.myId();
+		GlobalFd gFd = idsManage::makeGlobalFd(localFd, wID);
+		ClientId  c  = idsManage::globalIdToClient(idG);
+		WorkerId  w  = idsManage::globalIdToWorker(idG);
+		task order   = task::crear_workerOpenSucc(gFd, c);
+		enviarWorker(w, order);		
+	}
 }
-//void caseWorker(WorkerScope *who,task& t){
+void caseWorkerOpenWrite(WorkerScope *who,task& t){
+	string name  = t.getFileName();
+	GlobalId idG = t.getIdGlobal();
+	fileStatus state = who->MylocalFiles.status(name);
+	if (state == noFile){
+		responderClienteRemoto(idG,mensaje::archivoNoExiste());
+	}else if (state != unused){
+		responderClienteRemoto(idG, mensaje::archivoOcupado());
+	}else{
+		RealFSHandle handle = openw(name);
+		LocalFd localFd = who->MyfdManage.registerFd(idG, name, handle);
+		who->MylocalFiles.openW(name);
+		WorkerId wID = who->MyIdsManage.myId();
+		GlobalFd gFd = idsManage::makeGlobalFd(localFd, wID);
+		ClientId  c  = idsManage::globalIdToClient(idG);
+		WorkerId  w  = idsManage::globalIdToWorker(idG);
+		task order   = task::crear_workerOpenSucc(gFd, c);
+		enviarWorker(w, order);		
+	}
+}
+void caseWorkerOpenSucc(WorkerScope *who,task& t){
+	ClientId c = t.getCliente();
+	GlobalFd gFd = t.getGlobalFd();
+	who->MyopenedFiles.registerOpen(gFd,c);
+	responderCliente(c, mensaje::archivoAbierto(gFd), who);
+}
+void caseWorkerRead(WorkerScope *who,task& t){
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = t.getIdGlobal();
+	LocalFd fd = idsManage::globalFdToLocalFd(gFd);
+	if (who->MyfdManage.getOwner(fd) != idG){
+		responderClienteRemoto(idG,mensaje::permisoDenegado());
+	}else{
+		RealFSHandle handle = who->MyfdManage.getHandle(fd);
+		int sz = t.getSizeTxt();
+		string txt;
+		if(read(handle,sz,txt)){
+			responderClienteRemoto( idG, mensaje::archivoReadSucc(txt));
+		}else{
+			responderClienteRemoto( idG, mensaje::finDeArchivo());
+		}
+	}
+}
+void caseWorkerWrite(WorkerScope *who,task& t){
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = t.getIdGlobal();
+	LocalFd fd = idsManage::globalFdToLocalFd(gFd);
+	if (who->MyfdManage.getOwner(fd) != idG){
+		responderClienteRemoto(idG,mensaje::permisoDenegado());
+	}else{
+		RealFSHandle handle = who->MyfdManage.getHandle(fd);
+		string txt = t.getStrTxt();
+		write(handle, txt);
+		responderClienteRemoto( idG, mensaje::archivoWriteSucc());
+		
+	}
+}
+void caseWorkerSay(WorkerScope *who,task& t){
+	ClientId c = t.getCliente();
+	mensaje msj = t.getMensaje();
+	responderCliente(c, msj, who);
+	
+}
 
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
-//void caseWorker(WorkerScope *who,task& t){
-
-//}
+void caseWorkerClose(WorkerScope *who,task& t){
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = t.getIdGlobal();
+	LocalFd fd = idsManage::globalFdToLocalFd(gFd);
+	if (who->MyfdManage.getOwner(fd) != idG){
+		responderClienteRemoto(idG,mensaje::permisoDenegado());
+	}else{
+		string file = who->MyfdManage.getNameFile(fd);
+		who->MyfdManage.unregisterFd(fd);
+		who->MylocalFiles.close(file);
+		task order = task::crear_workerCloseSucc(gFd, idG);
+		WorkerId  w  = idsManage::globalIdToWorker(idG);
+		enviarWorker(w,order);
+	}
+}
+void caseWorkerCloseBye(WorkerScope *who,task& t){
+	GlobalFd gFd = t.getGlobalFd();
+	LocalFd fd = idsManage::globalFdToLocalFd(gFd);
+	string file = who->MyfdManage.getNameFile(fd);
+	who->MyfdManage.unregisterFd(fd);
+	who->MylocalFiles.close(file);
+	who->MyopenedFiles.registerClose(gFd);
+}
+void caseWorkerCloseSucc(WorkerScope *who,task& t){
+	GlobalFd gFd = t.getGlobalFd();
+	GlobalId idG = t.getIdGlobal();
+	ClientId cID = idsManage::globalIdToClient(idG);
+	who->MyopenedFiles.registerClose(gFd);
+	responderCliente(cID,mensaje::archivoCerrado(), who);
+}
+void caseWorkerToken(WorkerScope *who,task& t){
+	token tk = t.getToken();
+}
 
 	
 void procTask(WorkerScope *who,task& t) {
@@ -261,23 +339,32 @@ void procTask(WorkerScope *who,task& t) {
 		case workerOpenRead:
 			caseWorkerOpenRead(who,t);
 		break;
-		case workerWrite:
+		case workerOpenWrite:
+			caseWorkerOpenWrite(who,t);
 		break;
 		case workerRead:
+			caseWorkerRead(who,t);
 		break;
-		case workerOpenWrite:
+		case workerWrite:
+			caseWorkerWrite(who,t);
 		break;
 		case workerSay:
+			caseWorkerSay(who,t);
 		break;
 		case workerOpenSucc:
+			caseWorkerOpenSucc(who,t);
 		break;
 		case workerClose:
+			caseWorkerClose(who,t);
 		break;
 		case workerCloseBye:
+			caseWorkerCloseBye(who,t);
 		break;
 		case workerCloseSucc:
+			caseWorkerCloseSucc(who,t);
 		break;
 		case workerToken:
+			caseWorkerToken(who,t);
 		break;
 	}
 }

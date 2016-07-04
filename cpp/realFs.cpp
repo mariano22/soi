@@ -12,7 +12,7 @@ bool read(RealFSHandle h, int sz, string &data) {
 	fread ( buffer, 1, sz, h );
 	data=string(buffer);
 	free(buffer);
-	return false;
+	return true;
 }
 void write(RealFSHandle h, const string& txt) {
 	fwrite (txt.c_str() , sizeof(char), txt.size(), h);
