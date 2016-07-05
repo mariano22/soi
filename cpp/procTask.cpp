@@ -288,7 +288,6 @@ void caseWorkerCloseBye(WorkerScope *who,task& t){
 	string file = who->MyfdManage.getNameFile(fd);
 	who->MyfdManage.unregisterFd(fd);
 	who->MylocalFiles.close(file);
-	//who->MyopenedFiles.registerClose(gFd);
 }
 void caseWorkerCloseSucc(WorkerScope *who,task& t){
 	GlobalFd gFd = t.getGlobalFd();
