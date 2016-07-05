@@ -43,8 +43,6 @@ bool tokenControl::mustProc() {
 	struct timespec actual; clock_gettime(CLOCK_MONOTONIC, &actual);
 	double seconds = (actual.tv_sec - trec.tv_sec);
 	seconds += (actual.tv_nsec - trec.tv_nsec) / 1000000000.0;
-	//~ DEBUG
-	//~ cout << "diff " << seconds  << endl;
 	return seconds > double(TOKEN_MILLISECONDS_TIME) / 1000. ;
 }
 

@@ -13,8 +13,11 @@
 #include "syncQueues.h"
 using namespace std;
 
-int main() {
-	workerCant = 2 ;
+int main(int argc, char *argv[]) {
+	if ( argc!=2 || sscanf(argv[1],"%d",&workerCant)<1 ) {
+		cout << "Modo de uso:\n\tmain <cantidad de workers>\n";
+		return 0;
+	}
 	
     pthread_t *wfs = (pthread_t *) malloc(workerCant*sizeof(pthread_t));
     int *ids = new int[workerCant];

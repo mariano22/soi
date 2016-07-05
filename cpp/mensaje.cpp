@@ -93,8 +93,5 @@ string mensaje::say() const {
 	return res;
 }
 
-
-
-
 void mensaje::setHeader(const string& h) { header = h; }
 void mensaje::addArg(const string& arg) { args.push_back(arg); }
