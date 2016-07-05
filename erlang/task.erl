@@ -2,7 +2,6 @@
 -compile(export_all).
 -import(parser,[parser/1]).
 
-
 % Tasks
 % Los modelamos como { TypeTask, [{campo,contenido}] }
 
@@ -40,7 +39,6 @@ crear_workerToken(Token)           -> { workerToken, [{token,Token}] }.
 
 toData(X) -> term_to_binary(X).
 fromData(X) -> binary_to_term(X).
-% OrdenName == userLsd, userDelete, userCreate, userOpenRead, userOpenWrite, wrt, rea, userClose, userBye
 fromUserData(List,IdCon) ->
     io:format("~p~p~n",[List,IdCon]),
     case List of

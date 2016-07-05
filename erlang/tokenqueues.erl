@@ -10,7 +10,7 @@
 
 
 loop( LC, LD ) ->
-    io:format("tokenqueues: ~p ~p~n",[LC,LD]),
+    io:format("tokenqueues: ~p ~p~n",[LC,LD]), %DEBUG
     receive
         {P, getCreates}  ->  P ! {tokenqueuesserver, LC},
                                   loop( [], LD ) ;

@@ -6,10 +6,8 @@
 % find  : Clientid      -> ok  (devuelve el pid del proceso que atiende la comunicacion de un cliente)
 % delC :  Clientid      -> ok  (borra un cliente, porque se desconecto)
 
-% DEBUG
-
 loop( L ) ->
-    io:format("localconections: ~p~n",[L]),
+    io:format("localconections: ~p~n",[L]), % DEBUG
     receive
         {P,  newC, Cid,Pid }  ->   Lp = [{Cid,Pid}|L],
                                    P ! {localconectionsserverResponse, ok},

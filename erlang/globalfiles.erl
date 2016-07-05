@@ -7,13 +7,9 @@
 % baja : String -> ok (Da de baja un archivo en la tabla)
 % alta : String, WorkerId -> ok (Da de alta un archivo en la tabla, asignandole un dueño)
 
-% DEBUG
-dbg([]) -> io:format("~n~n");
-dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),"} "])),
-              dbg(L).
 
 loop( L ) ->
-    io:format("globalfiles: ~p~n",[L]),
+    io:format("globalfiles: ~p~n",[L]), %DEBUG
     receive
         {P, archivosActuales}  -> { Archivos , _ } = lists:unzip( L ),
                                   P ! { globalfilesserverResponse, Archivos },

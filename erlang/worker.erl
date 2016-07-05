@@ -17,7 +17,7 @@ init(MyId) ->
 
 loop() -> 
     receive
-        Task             -> io:format("Task: ~p~n",[Task]),
+        Task             -> io:format("Task: ~p~n",[Task]), %DEBUG
                             proctask:proc(task:name(Task),Task)
         after tokencontrol:tickTime() -> ok
     end,
@@ -26,7 +26,7 @@ loop() ->
 
 
 procToken() ->
-    io:format("Empezando Token~n"),
+    io:format("Procesando Token~n"), %DEBUG
     Token = tokencontrol:getT(),
     ListaAltasOld = tokencontrol:getListaAltas(Token),
     ListaBajasOld = tokencontrol:getListaBajas(Token),
@@ -54,11 +54,11 @@ procToken() ->
 %   Modificar estado global con las listas Alta/Baja
     lists:foreach( fun({NameFile,WorkerId}) -> globalfiles:alta(NameFile,WorkerId) end, ListaAltasNew ),
     lists:foreach( fun({NameFile,_}) -> globalfiles:baja(NameFile) end, ListaBajasNew ),
-%        pasar el token    
+%   asar el token    
     NewToken = tokencontrol:makeToken(ListaAltasNew,ListaBajasNew),
-    io:format("NewToken: ~p ~p ~p~n",[ListaAltasNew,ListaBajasNew,NewToken]),
+    io:format("NewToken: ~p ~p ~p~n",[ListaAltasNew,ListaBajasNew,NewToken]), %DEBUG
     Orden    = task:crear_workerToken(NewToken),
-    io:format("NextId ~p~n",[ids:nextWorkerId()]),
+    io:format("NextId ~p~n",[ids:nextWorkerId()]), %DEBUG
     comunic:enviarWorker(ids:nextWorkerId(), Orden),
     ok.
     

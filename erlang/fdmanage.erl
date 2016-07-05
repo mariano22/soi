@@ -8,13 +8,8 @@
 % unregisterFd : LocalFd -> ok (Borra un Fd de la tabla)
 % registerFd : Globalid, Handle,NameFile -> LocalFd (Registra un nuevo Fd la tabla y devuelve le Fd asignado)
 
-% DEBUG
-dbg([]) -> io:format("~n~n");
-dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),",",element(3,X),"} "])),
-              dbg(L).
-
 loop( L , FdC) ->
-    io:format("fdmanage: ~p~n",[L]),
+    io:format("fdmanage: ~p~n",[L]), %DEBUG
     receive
         {P, getHandle, Fd} -> case lists:keyfind(Fd,1,L) of
                                       false -> P ! noFd ;

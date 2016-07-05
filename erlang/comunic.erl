@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%
-%  Modulo worker_inbox %
+%  Modulo comunic      %
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 -module(comunic).
@@ -29,15 +29,12 @@ internInbox(ListenSock) ->
 	spawn(?MODULE,internInboxSlave,[Socket]),
 	internInbox(ListenSock).
 
-% Si Type es extern, se está comunicando con el cliente, caso en el cual la comunicación se mantiene, reciviendo comandos y retransmitiendo la respuesta del worker al cliente hasta que éste último decida despedirse.
-% Si Type es intern, se está comunicando con otro worker, caso en el cual se retransmite el mensaje al worker, sin esperarse respuesta alguna.
-% Agrega el encabezado PS o WRK dependiendo si el mensaje viene de una fuente externa o de otro worker respectivamente.
 externInboxSlave(Socket,IdCon) ->
 	Data = sockaux:gets(Socket),
     if Data==error ->
                 Task = {userBye, [{cliente,IdCon}]},
                 mainWorker ! Task,
-                receive X -> ok end,
+                receive _ -> ok end,
                 gen_tcp:close(Socket), localconections:delC(IdCon);
     true -> ParsedData = parser:parse(Data),
              Task = task:fromUserData(ParsedData,IdCon),
@@ -50,9 +47,9 @@ externInboxSlave(Socket,IdCon) ->
     end.
 
 internInboxSlave(Socket) ->
-	{ok,Data} = gen_tcp:recv(Socket,0), % MODIFICAR!
+	{ok,Data} = gen_tcp:recv(Socket,0),
     if Data==error -> gen_tcp:close(Socket);
-    true ->  %DEBUG
+    true ->
              Task = task:fromData(Data),
              mainWorker ! Task,
              gen_tcp:close(Socket)
@@ -61,17 +58,16 @@ internInboxSlave(Socket) ->
 responderCliente(Cid, M) ->
     case localconections:find(Cid) of
         noClient -> error("Cliente no encontrado!");
-        P -> io:format("Mensaje: ~p~n",[mensaje:say(M)]), %DEBUG
+        P -> % io:format("Mensaje: ~p~n",[mensaje:say(M)]), %DEBUG
              P ! mensaje:say(M)
     end.
 
-test2(P) -> enviarTask('127.0.0.1',P,{asd}).
 
 enviarTask(WorkerIP,WorkerPort,Task) ->
-    io:format("Enviando a Worker: ~p ~p ~p~n",[WorkerIP,WorkerPort,Task]), %DEBUG
+    % io:format("Enviando a Worker: ~p ~p ~p~n",[WorkerIP,WorkerPort,Task]), %DEBUG
 	{ok, Socket} = gen_tcp:connect(WorkerIP,WorkerPort,[binary,{packet,4}, {active,false}]),
     SendData = task:toData(Task),
-    %DEBUG io:format("~p~n",[SendData]),
+    % io:format("~p~n",[SendData]), %DEBUG
 	gen_tcp:send(Socket,SendData),
 	gen_tcp:close(Socket),
     ok.

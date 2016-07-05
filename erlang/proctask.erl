@@ -221,7 +221,7 @@ proc( workerClose, Task ) ->
          true  -> F     = fdmanage:getNameFile(Fd),
                   realfs:close(fdmanage:getHandle(Fd)),
                   fdmanage:unregisterFd(Fd),
-                  io:format("dbg: ~p ~p~n",[Fd,F]), % DEBUG
+                  % io:format("dbg: ~p ~p~n",[Fd,F]), % DEBUG
                   localfiles:close(F),
                   Orden = task:crear_workerCloseSucc(Gfd, Idg),
                   W     = ids:globalIdToWorker(Idg),

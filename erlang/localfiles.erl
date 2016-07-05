@@ -9,13 +9,9 @@
 % openW : String -> ok (Suma un escritor al archivo, el llamante se asegura que nunca halla mas de uno)
 % close : String -> ok (Resta un usuario al archivo, detectando si esta siendo leido o escrito)
 
-% DEBUG
-dbg([]) -> io:format("~n~n");
-dbg([X|L]) -> io:format(lists:concat(["{",element(1,X),",",element(2,X),",",element(3,X),"} "])),
-              dbg(L).
 
 loop( L ) ->
-        io:format("localfiles: ~p~n",[L]),
+        io:format("localfiles: ~p~n",[L]), % DEBUG
     receive
         {P, status, NameFile} -> case lists:keyfind(NameFile,1,L) of
                                       false -> P ! { localfilesserverResponse, noFile };

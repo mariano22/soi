@@ -12,8 +12,8 @@
 % getListaBajas : Token -> [ {NameFile,WorkerId} ]
 
 loop( T, F ) ->
-% DEBUG
-%    io:format("tokencontrol: ~p ~p~n",[T,F]), 
+
+%    io:format("tokencontrol: ~p ~p~n",[T,F]), %DEBUG
     receive
         { P, getT }  ->  P ! {tokencontrolserverResponse, T },
                            loop( nothing , false ) ;
