@@ -1,5 +1,5 @@
 -module(fdmanage).
--compile(export_all).
+-compile([setUp/0, getHandle/1, getNameFile/1, getOwner/1, unregisterFd/1, registerFd/3]).
 
 % Funciones:
 % getHandle : LocalFd -> Handle (Dado un Fd devuelve el Handle del sistema de archivos real)

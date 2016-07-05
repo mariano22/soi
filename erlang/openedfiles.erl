@@ -1,5 +1,5 @@
 -module(openedfiles).
--compile(export_all).
+-compile(setUp/0, registerOpen/2, registerClose/1, globalFdList/1]).
 
 % La funcion de este modulo es llevar un seguimiento de los GlobalFd tomados por clientes conectados a este worker
 % Funciones

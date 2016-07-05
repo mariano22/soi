@@ -1,5 +1,5 @@
 -module(localfiles).
--compile(export_all).
+-compile([setUp/0, status/1, delete/1, openR/1, openW/1, create/1, close/1]).
 
 % Funciones
 % status : String -> noFile | reading | writing | unused (Dado un archivo, si esta localmente devuelve el estado)

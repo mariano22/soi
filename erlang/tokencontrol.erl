@@ -1,5 +1,5 @@
 -module(tokencontrol).
--compile(export_all).
+-compile([setU/0, tickTime/0, recvT/1, getT/, mustProc/0, makeToken/2, getListaAltas/2, getListaBajas/2]).
 
 % Este es el modulo que encapsula el manejo del token
 % Funciones

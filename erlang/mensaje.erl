@@ -1,5 +1,5 @@
 -module(mensaje).
--compile(export_all).
+-compile([mOk/0, mErr/0, say/1, archivoNoExiste/0, archivoOcupado/0, archivoExistente/0, permisoDenegado/0, finDeArchivo/0, archivoCreado/0, archivoBorrado/0, archivoCerrado/0, archivoWriteSucc/0, archivoReadSucc/1, archivoAbierto/1, coneccionEstablecida/1]).
 
 mOk()  -> ["OK"].
 mErr() -> ["ERROR"].

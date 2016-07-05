@@ -1,5 +1,5 @@
 -module(sockaux).
--compile(export_all).
+-compile([gets/1]).
 
 % Lee una línea (hasta '\0' o '\n') o hasta que ocurra algún error en la conexión (como que el cliente se desconecte)
 gets(Sock) -> case gen_tcp:recv(Sock,1) of

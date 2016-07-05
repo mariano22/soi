@@ -7,7 +7,7 @@
 % Las peticiones de dicho cliente son procesadas (parseadas y validadas) antes de ser enviadas al Worker remoto elegido. Luego se envía la respuesta del Worker al cliente.
 
 -module(dispatcher).
--compile(export_all).
+-compile([init/0]).
 -define(DISPATCHER_LISTEN_PORT,8080).
 -include("worker_list.hrl").
 

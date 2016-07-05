@@ -1,5 +1,5 @@
 -module(worker).
--compile(export_all).
+-compile([init/1]).
 
 init(MyId) ->
     register(mainWorker,self()),

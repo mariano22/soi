@@ -1,12 +1,12 @@
 -module(tokenqueues).
--compile(export_all).
+-compile(setUp/0, newCreate/2, newDelete/1, getCreates/0, getDeletes/0, isInCreate/1]).
 
 % Funciones:
-% newCreate : String, ClientId -> ok (agrega a la lista de candidatos a crearse, el cliente es para saber a quien responder)
-% newDelete : String -> ok (agrega a la lista de bajas a informarse)
+% newCreate  : String, ClientId -> ok (agrega a la lista de candidatos a crearse, el cliente es para saber a quien responder)
+% newDelete  : String -> ok (agrega a la lista de bajas a informarse)
 % getCreates : () -> [{String,WiD}] (extrae la lista de creaciones candidatas)
 % getDeletes : () -> [String] (extrae la lista de bajas a informarse)
-
+%isInCreate  : string -> bool (true si el archivo existe false cc)
 
 
 loop( LC, LD ) ->
