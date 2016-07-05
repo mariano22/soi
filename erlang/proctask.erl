@@ -157,10 +157,13 @@ proc(workerWrite, Task)->
     Fd  = ids:globalFdToLocalFd(Gfd),
     case fdmanage:getOwner(Fd)==IdG of
          false -> responderClienteRemoto( IdG, mensaje:permisoDenegado());
-         true  -> Handle = fdmanage:getHandle(Fd),
-                  Data   = task:strTxt(Task),
-                  realfs:write ( Handle, Data),
-                  responderClienteRemoto( IdG, mensaje:archivoWriteSucc())
+         true  -> case localfiles:status(fdmanage:getNameFile(Fd)) of
+                       writing -> Handle = fdmanage:getHandle(Fd),
+                                  Data   = task:strTxt(Task),
+                                  realfs:write ( Handle, Data),
+                                  responderClienteRemoto( IdG, mensaje:archivoWriteSucc());
+                       _       -> responderClienteRemoto( IdG, mensaje:permisoDenegado())
+                  end
     end,
     ok;
 
@@ -187,13 +190,16 @@ proc(workerRead, Task)->
     Fd  = ids:globalFdToLocalFd(Gfd),
     case fdmanage:getOwner(Fd)==IdG of
          false -> responderClienteRemoto( IdG, mensaje:permisoDenegado());
-         true  -> Handle = fdmanage:getHandle(Fd),
-                  Sz     = task:sizeTxt(Task),
-                  case realfs:read(Handle,Sz) of
-                        eof -> responderClienteRemoto( IdG, mensaje:finDeArchivo());
-                        Txt -> responderClienteRemoto( IdG, mensaje:archivoReadSucc(Txt))
-                  end
-    end,
+         true  -> case localfiles:status(fdmanage:getNameFile(Fd)) of
+                       reading -> Handle = fdmanage:getHandle(Fd),
+                                  Sz     = task:sizeTxt(Task),
+                                  case realfs:read(Handle,Sz) of
+                                        eof -> responderClienteRemoto( IdG, mensaje:finDeArchivo());
+                                        Txt -> responderClienteRemoto( IdG, mensaje:archivoReadSucc(Txt))
+                                  end;
+                       _       -> responderClienteRemoto( IdG, mensaje:permisoDenegado())
+                   end
+   end,
     ok;
 
 %---------------------------------------------------------------------------------------------------------------
@@ -296,7 +302,6 @@ proc( workerCloseBye, Task ) ->
     F   = fdmanage:getNameFile(Fd),
     fdmanage:unregisterFd(Fd),
     localfiles:close(F),
-%    openedfiles:registerClose(Gfd),
     ok;
 
 %---------------------------------------------------------------------------------------------------------------

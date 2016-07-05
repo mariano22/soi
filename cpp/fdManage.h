@@ -21,7 +21,7 @@ class fdManage {
 		#ifdef DEBUG_FLAG
 		string say() const;
 		#endif
-	private:/*ver como hacer en el .cpp*/
+	private:
 		struct fd_info {
 			string n;
 			GlobalId g;

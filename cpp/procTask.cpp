@@ -230,7 +230,7 @@ void caseWorkerRead(WorkerScope *who,task& t){
 	LocalFd fd = idsManage::globalFdToLocalFd(gFd);
 	if (who->MyfdManage.getOwner(fd) != idG){
 		responderClienteRemoto(idG,mensaje::permisoDenegado());
-	}else{
+	}else if (reading == who->MylocalFiles.status(who->MyfdManage.getNameFile(fd))){///aca		
 		RealFSHandle handle = who->MyfdManage.getHandle(fd);
 		int sz = t.getSizeTxt();
 		string txt;
@@ -239,6 +239,8 @@ void caseWorkerRead(WorkerScope *who,task& t){
 		}else{
 			responderClienteRemoto( idG, mensaje::finDeArchivo());
 		}
+	}else{
+		responderClienteRemoto(idG,mensaje::permisoDenegado());
 	}
 }
 void caseWorkerWrite(WorkerScope *who,task& t){
@@ -247,12 +249,13 @@ void caseWorkerWrite(WorkerScope *who,task& t){
 	LocalFd fd = idsManage::globalFdToLocalFd(gFd);
 	if (who->MyfdManage.getOwner(fd) != idG){
 		responderClienteRemoto(idG,mensaje::permisoDenegado());
-	}else{
+	}else if (writing == who->MylocalFiles.status(who->MyfdManage.getNameFile(fd))){///aca		
 		RealFSHandle handle = who->MyfdManage.getHandle(fd);
 		string txt = t.getStrTxt();
 		write(handle, txt);
 		responderClienteRemoto( idG, mensaje::archivoWriteSucc());
-		
+	}else{
+		responderClienteRemoto(idG,mensaje::permisoDenegado());
 	}
 }
 void caseWorkerSay(WorkerScope *who,task& t){
@@ -285,7 +288,6 @@ void caseWorkerCloseBye(WorkerScope *who,task& t){
 	string file = who->MyfdManage.getNameFile(fd);
 	who->MyfdManage.unregisterFd(fd);
 	who->MylocalFiles.close(file);
-	//who->MyopenedFiles.registerClose(gFd);
 }
 void caseWorkerCloseSucc(WorkerScope *who,task& t){
 	GlobalFd gFd = t.getGlobalFd();
