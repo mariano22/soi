@@ -1,5 +1,6 @@
 -module(tokenqueues).
--compile(setUp/0, newCreate/2, newDelete/1, getCreates/0, getDeletes/0, isInCreate/1]).
+-compile(export_all).
+%-export(setUp/0, newCreate/2, newDelete/1, getCreates/0, getDeletes/0, isInCreate/1]).
 
 % Funciones:
 % newCreate  : String, ClientId -> ok (agrega a la lista de candidatos a crearse, el cliente es para saber a quien responder)

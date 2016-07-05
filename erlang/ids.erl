@@ -1,5 +1,6 @@
 -module(ids).
--compile([setUp/1, myId/0, nextWorkerId/0, makeIdGlobal/2, globalIdToWorker/1, globalIdToClient/1, globalFdToWorker/1, globalFdToLocalFd/1, makeGlobalFd/2]).
+-compile(export_all).
+%-export([setUp/1, myId/0, nextWorkerId/0, makeIdGlobal/2, globalIdToWorker/1, globalIdToClient/1, globalFdToWorker/1, globalFdToLocalFd/1, makeGlobalFd/2]).
 
 
 loop( L ) ->

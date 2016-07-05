@@ -1,5 +1,6 @@
 -module(globalfiles).
--compile([setUp/0, archivosActuales/0, getOwner/1, baja/1, alta/2]).
+-compile(export_all).
+%-export([setUp/0, archivosActuales/0, getOwner/1, baja/1, alta/2]).
 
 % Funciones:
 % archivosActuales () -> [String] (Lista los archivos que actualmente es la base de datos global del worker)

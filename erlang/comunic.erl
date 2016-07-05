@@ -3,7 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 -module(comunic).
--compile([setUp/2, responderCliente/2, enviarWorker/2]).
+-compile(export_all).
+%-export([setUp/2, responderCliente/2, enviarWorker/2]).
 -import(parser,[parse/1]).
 -import(sockaux,[sockaux_gets/1]).
 

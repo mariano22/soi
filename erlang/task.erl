@@ -1,5 +1,6 @@
 -module(task).
 -compile(export_all).
+%-export(export_all).
 -import(parser,[parser/1]).
 
 % Tasks

@@ -1,5 +1,6 @@
 -module(realfs).
--compile([openr/1, openw/1, read/2, write/2, close/1, create/1, delete/1]).
+-compile(export_all).
+%-export([openr/1, openw/1, read/2, write/2, close/1, create/1, delete/1]).
 -define(WORKER_PATH,"./fs/").
 
 % este modulo es el encargado de encapsular la interaccion con el sistema de archivos real subyacente

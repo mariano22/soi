@@ -7,7 +7,8 @@
 % Las peticiones de dicho cliente son procesadas (parseadas y validadas) antes de ser enviadas al Worker remoto elegido. Luego se envía la respuesta del Worker al cliente.
 
 -module(dispatcher).
--compile([init/0]).
+-compile(export_all).
+%-export([init/0]).
 -define(DISPATCHER_LISTEN_PORT,8080).
 -include("worker_list.hrl").
 
@@ -19,7 +20,7 @@ init() -> setUp(?DISPATCHER_LISTEN_PORT).
 
 setUp(ListenPort) ->
 	{ok,ListenSock} = gen_tcp:listen(ListenPort, [list, {active,false}]),
-	spawn(?MODULE,accept_loop,[ListenSock]),
+	spawn(dispatcher,accept_loop,[ListenSock]),
     ok.
 
 % Espera una conexión entrante y crea un proceso que ejecute socket_process_start que se ocupe de dicho cliente

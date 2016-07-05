@@ -1,5 +1,6 @@
 -module(localconections).
--compile([setUp/0, newC/2, find/1, delC/1]).
+-compile(export_all).
+%-export([setUp/0, newC/2, find/1, delC/1]).
 
 % Funciones:
 % newC : Clientid , Pid -> ok (registra que el cliente esta atendida su comunicacion por medio del esclavo cuyo pid es Pid)
