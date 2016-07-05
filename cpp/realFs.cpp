@@ -15,7 +15,6 @@ RealFSHandle openw(string fileName) {
 }
 bool read(RealFSHandle h, int sz, string &data) {
 	if (feof(h)) return false;
-	cerr << "ALTO DEBUG PAPA: " << sz << endl;
 	char *buffer = (char*) malloc (sizeof(char)*(sz+1));
 	fread ( buffer, 1, sz, h ); buffer[sz]=0;
 	data=string(buffer);

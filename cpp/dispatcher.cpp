@@ -14,12 +14,16 @@ void *clientSlave(void *arg) {
 	cout << "DISPATCHER: Nuevo Cliente #" << myId << " asosciado a " << wId << endl;
 	#endif*/
 	
-	bool exit_flag;
-	do {
-		string data;
-		exit_flag = getLineSocket(conn_s,data);
-		vector<string> pData = parser(data);
-		pair<task,bool> result = task::fromUserData(pData,myId);
+	
+	while (true) {
+		string data; pair<task,bool> result;
+		if ( getLineSocket(conn_s,data) ) {
+			task r; r.setTaskName(userBye); r.setCliente(myId);
+			result = make_pair(r,true);
+		} else {
+			vector<string> pData = parser(data);
+			result = task::fromUserData(pData,myId);
+		}
 		
 		#ifdef DEBUG_FLAG
 		cout << "DISPATCHER: recibiendo mensaje de " << myId << ": " << data << endl;
@@ -37,10 +41,10 @@ void *clientSlave(void *arg) {
 			myInbox->recv(respuesta,-1);
 			string Sr = respuesta.say();
 			write(conn_s,Sr.c_str(),Sr.size());
-			exit_flag = result.first.getTaskName()==userBye;
+			if ( result.first.getTaskName()==userBye ) break;
 		}
 		
-  } while (!exit_flag);
+  }
   
 	/*#ifdef DEBUG_FLAG
 	cout << "DISPATCHER: cliente terminando " << myId << endl;

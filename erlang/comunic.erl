@@ -7,17 +7,6 @@
 -import(parser,[parse/1]).
 -import(sockaux,[sockaux_gets/1]).
 
-test(ID) ->
-    localconections:setUp(),
-    register(mainWorker,self()),
-    setUp(9000+ID,8000+ID),
-    testloop().
-testloop() -> 
-    receive X -> io:format("~p~n~n",[X]),
-                 responderCliente(task:cliente(X),mensaje:mOk())
-    end,
-    testloop().
-
 % Comienza a escuchar en el puerto que le corresponda al worker.
 setUp(InternPort,ExternPort) ->
         io:format("Puertos ~p  ~p~n~n",[InternPort,ExternPort]),
@@ -33,7 +22,6 @@ externInbox(ListenSock,IdCon) ->
     {ok,Socket} = gen_tcp:accept(ListenSock),
 	PS = spawn(?MODULE,externInboxSlave,[Socket,IdCon]),
     localconections:newC(IdCon,PS),
-    receive after 1000-> ok end,
 	externInbox(ListenSock,IdCon+1).
 
 internInbox(ListenSock) ->
@@ -46,7 +34,11 @@ internInbox(ListenSock) ->
 % Agrega el encabezado PS o WRK dependiendo si el mensaje viene de una fuente externa o de otro worker respectivamente.
 externInboxSlave(Socket,IdCon) ->
 	Data = sockaux:gets(Socket),
-    if Data==error -> gen_tcp:close(Socket), localconections:delC(IdCon);
+    if Data==error ->
+                Task = {userBye, [{cliente,IdCon}]},
+                mainWorker ! Task,
+                receive X -> ok end,
+                gen_tcp:close(Socket), localconections:delC(IdCon);
     true -> ParsedData = parser:parse(Data),
              Task = task:fromUserData(ParsedData,IdCon),
              mainWorker ! Task,

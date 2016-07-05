@@ -12,11 +12,8 @@ setUp(MyId) -> register( idserver, spawn(?MODULE,loop,[MyId]) ).
 
 myId( ) -> idserver ! { self(), myId }, 
            receive {idserverResponse, X} -> X end.
-nextWorkerId() -> 
-    A =( myId() +  1 ),
-    B = workerdirs:wlen(),
-    io:format("por las dudas ~p ~p~n",[A,B]),
-    A rem B.
+nextWorkerId() ->     ( myId() +  1 ) rem workerdirs:wlen().
+
 makeIdGlobal(Worker, Client) -> { Worker,Client }.
 globalIdToWorker({W,_})     -> W.
 globalIdToClient({_,C})     -> C.
