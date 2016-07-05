@@ -295,7 +295,7 @@ proc( workerCloseBye, Task ) ->
     F   = fdmanage:getNameFile(Fd),
     fdmanage:unregisterFd(Fd),
     localfiles:close(F),
-    openedfiles:registerClose(Gfd),
+%    openedfiles:registerClose(Gfd),
     ok;
 
 %---------------------------------------------------------------------------------------------------------------

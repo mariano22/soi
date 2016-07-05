@@ -136,12 +136,9 @@ void caseUserRead(WorkerScope *who,task& t){
 	GlobalFd gFd = t.getGlobalFd();
 	GlobalId idG = idsManage::makeIdGlobal(who->MyIdsManage.myId(),cID);
 	int sizeF = t.getSizeTxt();
-	bool b=false;
-	forall(it, (who->MyopenedFiles.globalFdList(cID))){ 
-		b = b || (*it==gFd);
-	}
-	string txt;
-	if (b){
+	
+	vector<GlobalFd> gFdS = (who->MyopenedFiles.globalFdList(cID));
+	if ( find(gFdS.begin(), gFdS.end(), gFd) != gFdS.end() ){
 		WorkerId w = idsManage::globalFdToWorker(gFd);
 		task order = task::crear_workerRead(sizeF,gFd, idG);
 		comunic:enviarWorker(w,order);
@@ -288,7 +285,7 @@ void caseWorkerCloseBye(WorkerScope *who,task& t){
 	string file = who->MyfdManage.getNameFile(fd);
 	who->MyfdManage.unregisterFd(fd);
 	who->MylocalFiles.close(file);
-	who->MyopenedFiles.registerClose(gFd);
+	//who->MyopenedFiles.registerClose(gFd);
 }
 void caseWorkerCloseSucc(WorkerScope *who,task& t){
 	GlobalFd gFd = t.getGlobalFd();
