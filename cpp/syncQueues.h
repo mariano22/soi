@@ -6,13 +6,17 @@
 #include <unistd.h>
 #include <time.h>
 using namespace std;
-
+/* 
+    Este módulo contiene implementadas colas que pueden ser compartidas por procesos, con métodos para pushear y popear elementos cuidando las condiciones de carrera, valiéndose del uso de locks y variables de condición de POSIX.
+*/
 template<class T>
 class syncQueues {
 	public:
 	syncQueues();
-	void push(T e);
-	bool recv(T& rv, int miliSeconds);
+    // Inserta un elemento en la cola
+	void push(T e); 
+    // Extrae un elemento en la cola. Si la cola está vacía, duerme hasta que algún otro proceso le inserte un elemento o hasta que se cumpla el timeout especificado. Devuelve false si salió por timeout y true si se efectivizó el recV.
+	bool recv(T& rv, int miliSeconds); 
 	private:
 	queue<T> cola;
 	pthread_mutex_t lock;
