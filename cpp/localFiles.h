@@ -19,7 +19,7 @@ class localFiles {
 		#ifdef DEBUG_FLAG
 		string say() const;
 		#endif
-	private://ver como importar/exportar
+	private:
 		struct status_info {
 			int lectores,escritores;
 			status_info(int lectores=0,int escritores=0) : lectores(lectores), escritores(escritores) {}

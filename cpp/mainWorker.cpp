@@ -44,8 +44,6 @@ void procToken(WorkerScope* myScope) {
 	forall(it,MyDeletes) ListaBajasNew.push_back( pair<string,WorkerId>(*it, myScope->MyIdsManage.myId()) );
 	vector< pair<string,ClientId> >  MyCreateRequests = myScope->MytokenQueues.getCreates();
 	
-	
-
 	vector< pair<string,ClientId> >  MyCreateRequestsOk;
 	forall(it, MyCreateRequests) {
 		bool f_is = false;
