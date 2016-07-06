@@ -1,0 +1,203 @@
+\documentclass[12pt]{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[spanish]{babel}
+
+\usepackage{amssymb,amsmath,amsthm,amsfonts}
+\usepackage{calc}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{gensymb}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+\setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+
+\title{Trabajo Final}					% Titulo
+\author{Crosetti Mariano \\Rinaldi Lautaro}					% Autor
+\date{\ 5 de Julio de 2016}						% Fecha
+
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\theauthor}
+\lhead{\thetitle}
+\cfoot{\thepage}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+	\centering
+    \vspace*{0.0 cm}
+    \includegraphics[scale = 2.5]{Sharing1.jpg}\\[1 cm]	% Logo Universidad
+% * <lautarorinaldi92@gmail.com> 2016-07-05T02:40:27.467Z:
+%
+% ^.
+    \textsc{\LARGE Universidad Nacional de Rosario}\\[2.0 cm]	% Nombre Universidad
+
+	\textsc{\large Sistemas Operativos I}\\[0.5 cm]		% Nombre Curso
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \thetitle}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{center} \large
+			\emph{Integrantes:}\\
+			\theauthor\linebreak
+			\end{center}
+	\end{minipage}\\[2 cm]
+	
+ 
+	\vfill
+	
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introducción}
+Nuestro \textit{sistema de archivos distribuidos} fue especialmente diseñado de modo que no posea elementos centralizados que violen la concepción de ser distribuido. Además se realiza de modo transparente al usuario.\\
+Se hizo especial énfasis en un diseño modular y flexible a futuras ampliaciones/modificaciones.\\
+
+\section{Requisitos adicionales implementados}
+Los puntos opcionales realizados (en el código de erlang)  fueron:
+\begin{itemize}
+\item Sistema de archivos real.
+\item Capacidad de posicionar los workers en distintas PC's.
+\item Opción de abrir los archivos como lectura o escritura.
+\end{itemize}
+
+\subsection{Nueva sintaxis para lectura y escritura}
+OPN ARG0  deja de existir, en su lugar se utilizan:
+\begin{itemize}
+\item OPNW ARG0 Abre el archivo ARG0 en modo escritura.
+\item OPNR ARG0 Abre el archivo ARG0 en modo lectura.
+\end{itemize}
+
+\section{Decisiones tomadas}
+Con el fin de simplificar partes engorrosas del trabajo y poderse focalizar en otras que juzgábamos más importante (diseño y manejo de concurrencia) hemos acordado los siguientes puntos con la cátedra:
+\begin{itemize}
+\item Usar C++ para la implementación en vez de C.
+\item Los archivos no pueen contener espacios
+\item Hemos cambiado sutilmente el protocolo de respuestas para con los clientes para que sea más detallado e informativo.
+\end{itemize}
+
+\section{Manual de uso}
+\subsection{Erlang}
+\begin{enumerate}
+\item Configurar correctamente el archivo worker\_list.hrl.
+\item Compilar todos los .erl ejecutando el script compall.sh
+\item Ejecutar la función \textit{dispatcher:init()}  desde erlang en la PC donde el dispatcher sea instalado.
+\item Corroborar que exista la carpeta fs dentro del directorio a montar los workers (pues aquí se crean los archivos).
+\item RECORDAR: el Worker de ID 0 es el que empieza con el Token, por lo que debe ser lanzado cuando ya están todos funcionando.
+\item Ejecutar la función \textit{worker:init(MyId)}  desde erlang en la PC donde residirá el Worker con ID especificada.
+\item Los Clientes se conectarán al dispatcher por el puerto 8080.
+\end{enumerate}
+
+\subsubsection{Formato worker\_list.hrl}
+-define(WORKER\_LIST, L).\\
+Donde L es una lista de cuatruplas de la forma:\\ \{\\IDWorker,\\ PuertoComunicacionDispatcher, \\PuertoComunicacionWorkers, \\IPWorker \\ \}
+
+
+\subsection{C++}
+\begin{enumerate}
+\item Compilar todo el proyecto con make.
+\item Corroborar que la exista la carpeta fs (pues aquí se crean los archivos).
+\item Ejecutar el programa main $<$cantida de workers$>$.
+\item Los Clientes se conectarán al dispatcher por el puerto 8080.
+\end{enumerate}
+
+\section{Conceptos Preliminares}
+Aquí explicamos algunos conceptos necesarios para entender el trabajo:
+\begin{itemize}
+\item \textbf{Cliente local:} desde la perspectiva de un worker, los clientes que él atiende de manera directa.
+\item \textbf{Cliente remoto:} desde la perspectiva de un worker, los clientes que él atiende de manera indirecta: por consecuencia de pedido de tasks de otros workers.
+\item \textbf{ClientId:} ID del cliente local al worker que lo atiende.
+\item \textbf{WorkerId:} ID que identifica al worker de los otros.
+\item \textbf{GlobalId:} ID que identifica al cliente de manera única del resto de los clientes conectados al Sistema de Archivos Distribuidos. Internamente es una combinación del ClientId y el WorkerId del worker que lo atiende.
+\item \textbf{LocalFd:} identificador de archivo que le da nuestro sistema a los archivos locales abiertos.
+\item \textbf{GlobalFd:} identificador de archivo único en nuestro sistema. Internamente es una combinación del LocalFd y el WorkerId del worker que posee el archivo abierto.
+\item \textbf{Task:} son las tareas a resolver por los workers. Son generados a partir de los comandos de los usuarios (UserTasks) y como consecuencia de la interacción entre workers (WorkerTasks). Cada una puede entenderse como una orden específica, con campos particulares (datos de entrada). Se procesan de forma atómica.
+\end{itemize}
+
+\section{Líneas generales de nuestro diseño}
+Cada Worker almacena información acerca del sistema de archivos y los clientes conectados a él.\\
+El dispatcher a medida que recibe las conexiones y comandos de los clientes actúa de pasarela con los Workers.\\
+Cada comando del usuario se transcribe en un Task para el Worker que lo atiende.\\
+Los Workers procesan los Task de a uno a la vez. Muy a menudo el procesamiento de un Task genera que se le envíe un nuevo Task a algún otro Worker del anillo.\\
+Los Workers forman un anillo virtual por donde circula un Token que sirve para manejar la concurrencia en el caso de las creaciones y borrados de archivos.\\
+Un panorama más detallado se puede obtener leyendo la guía de módulos.\\
+
+\section{Guía de Módulos}
+El trabajo fue realizado por módulos, cada uno encargado de funciones bien definidas. En el código de Erlang los módulos están brevemente comentados. Sus funciones se listan a continuación.
+\subsection{Comunicación}
+Aquí agrupamos a los módulos que encapsulan funciones de comunicación entre los Workers y con los Clientes:
+\begin{itemize}
+\item \textbf{comunic:} encargado de la comunicación entre distintos workers(PC's) y entre workers y clientes.
+\item \textbf{dispatcher:} encargado de asignar (o redirigir) un cliente a un worker. En la implementación de Erlang podríamos ubicarlo en una PC diferente a la de los workers, probablemente en una DMZ.
+\end{itemize}
+
+\subsection{Estructuras del Worker}
+Aquí agrupamos a los módulos que encapsulan las estructuras persistentes en cada Worker:
+\begin{itemize}
+\item \textbf{globalfiles:} guarda la imágen del sistema global que tiene el worker: los archivos que existen y sus respectivos dueños.
+\item \textbf{localfiles:} guarda el estado (lectores, escritores actuales) de los archivos locales (los que el worker es dueño).
+\item \textbf{fdmanage:} registra los archivos locales abiertos, asignando los LocalFd y llevando la correspondencia de los mismos con el Handle del Sistema de Archivos Real subyacente, el nombre del archivo en cuestión y el dueño del manejador.
+\item \textbf{openedfiles:} lleva la cuenta de los identificadores tomados por clientes locales.
+\item \textbf{localconections:} para cada cliente conectado al worker, almacena la correlación entre su Id. Esto permite que dado el Id se posea la información necesaria para contestarle. En la implementación en Erlang se guarda el Pid del proceso que se encarga de atender la conexión. En la implementación de C++ se guarda un puntero a una syncQueue que actúa como inbox.
+\item \textbf{ids:} contiene la información necesaria referente a los identificadores descriptos. Además tiene el Id del worker en cuestión y del siguiente en el anillo virtual.
+\item \textbf{tokenqueues:} almacena la Lista de Creaciones Requeridas (y el cliente que espera por su creación) y la Lista de Borrados a Informar que actúan en al funcionamiento de los borrados/creaciones.
+\item \textbf{tokencontrol:} encapsula el almacenamiento del Token y las funciones que indican cuándo procesarlo y con qué frecuencia. También las funciones para acceder a la Lista de Creaciones a Notificar y Lista de Borrados a Notificar del Token.
+\end{itemize}
+
+\subsection{Auxiliares}
+Aquí agrupamos a los módulos que realizan tareas de propósito general auxiliares a nuestro programa o encapsulan funcionalidades muy específicas:
+\begin{itemize}
+\item \textbf{mensaje:} encapsula las contestaciones de los Workers a los Clientes.
+\item \textbf{realfs:} encapsula la interacción con el sistema de archivos real subyacente.
+\item \textbf{parser:} función que tokeniza una cadena por espacios como separadores.
+\item \textbf{sockaux:} función que lee una conexión hasta el fin de línea o caracter nulo.
+\item \textbf{task:} encapsula y modela los Tasks, la forma en la que se acceden a sus campos, la generación de WorkerTasks a partir de los campos y la generación de UserTasks a partir de los comandos de usuarios.
+\item \textbf{workerdirs:} funciones para acceder a puertos y las direcciones de los workers.
+\end{itemize}
+
+\subsection{Sistema}
+\begin{itemize}
+\item \textbf{worker:} contiene las funciones encargadas de inicializar el worker, y el loop principal que ejecuta. Además contiene la función encargada de procesar al Token.
+\item \textbf{proctask:} se encarga de cómo procesar cada Task.
+\end{itemize}
+
+\section{Manejo de Concurrencia - Token Ring}
+
+El manejo de concurrencias es uno de los puntos importantes, para este caso decidimos tratarlo implementando Token Ring: los workers se agrupan en un anillo virtual por donde circula un Token.\\
+
+Cuando llega un pedido de creación de un archivo a un worker, éste verifica que no exista en su imagen del sistema un archivo con dicho nombre y añade el pedido a la cola de Lista de Creaciones Requeridas (manejada por el módulo tokenqueues), dejando esperando al cliente la respuesta para cuando llegue el Token y esta lista sea procesada.\\
+
+Similarmente cuando llega un pedido de borrado de un archivo local, se verifica que exista y no esté en uso, se lo borra y se añade a la Lista de Borrados a Informar (en tokenqueues).\\
+
+Dentro del Token circula la Lista de Creaciones ha Notificar y la Lista de Borrados ha Notificar de los workers para que otros workers actualicen su imagen del sistema. Así cuando un worker quiere informar un alta o baja lo pone en el Token Ring y lo saca cuando le llega nuevamente el Token (el mensaje habrá pasado por todos los demás worker una vez).\\
+
+Cuando un worker procesa el Token quita los pedidos que le correspondan a él de ambas listas (que ya dieron una vuelta entera al anillo). Luego agrega sus Borrados ha Informar a la lista que el Lista de Borrados a Notificar del Token. Los pedidos de creación de archivos almacenados en la Lista de Creaciones Requeridas que no aparezcan ya en la Lista de Creaciones a Notificar del Token, se contesta al Cliente que la creación ha sido exitosa y se agrega a esta última lista del token, de aparecer contesta que el archivo ya existía con anterioridad.\\
+
+Luego con este nuevo Token generado actualiza la imagen del sistema y pasa este nuevo Token al siguiente worker del anillo.\\
+
+Como se puede observar, con este mecanismo se mantiene la consistencia del sistema y se resuelven eventuales condiciones de carrera.
+\end{document}
