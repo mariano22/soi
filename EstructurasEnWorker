@@ -6,7 +6,7 @@ guarda la imagen del sistema global que tiene el worker
 localfiles: ( NameFile -> reading | writting | unused )
 guarda el estado de los archivos locales (los que el worker es dueño)
 
-fdmanage: ( LocalFd -> Handle, GlobalId )
+fdmanage: ( LocalFd -> Handle, GlobalId,NameFile )
 lleva la cuenta de los LocalFd respectivos a los archivos locales abiertos, quien los abrió y el handle del sistema de archivos real respectivo
 
 openedfiles: ( ClientId -> GlobalFd )
