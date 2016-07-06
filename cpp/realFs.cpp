@@ -36,4 +36,3 @@ void deletef(string fileName) {
 void close(RealFSHandle h) {
 	fclose(h);
 }
-

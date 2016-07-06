@@ -37,7 +37,7 @@ mensaje mensaje::permisoDenegado() {
 }
 
 mensaje mensaje::finDeArchivo() { 
-	mensaje r = mErr();
+	mensaje r = mOk();
 	r.addArg("EOF");
 	return r;
 }

@@ -3,7 +3,7 @@
 #define forall(it,v) for(auto it=v.begin();it!=v.end();++it)
 #define fst first
 #define snd second
-#define TOKEN_MILLISECONDS_TIME 5000
+#define TOKEN_MILLISECONDS_TIME 10
 
 vector< pair<string,WorkerId> > token::getListaAltas() {
 	vector< pair<string,WorkerId> > res = lc;
