@@ -24,7 +24,7 @@ loop( T, F ) ->
         _ -> error("esto no deberia suceder 666")
     end.
 setUp() -> register( tokencontrolserver, spawn(?MODULE,loop,[nothing,false]) ).
-tickTime() -> 1000.
+tickTime() -> 10.
 recvT_aux(TT) -> 
             receive after tickTime() -> ok end,
             tokencontrolserver ! {self(), recvT, TT }, 
